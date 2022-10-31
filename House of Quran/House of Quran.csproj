@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>House_of_Quran</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="fonts\Al Qalam Quran Majeed.ttf" />
+    <None Remove="fonts\Me Quran.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="fonts\Al Qalam Quran Majeed.ttf" />
+    <Resource Include="fonts\Me Quran.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+</Project>
