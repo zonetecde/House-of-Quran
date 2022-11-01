@@ -12,10 +12,13 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="1" Background="White" CornerRadius="20,20,0,0">
-            <ScrollViewer Margin="15,15,15,15" >
-                <local:AlignableWrapPanel HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
-            </ScrollViewer>
+        <Border Background="White" Grid.Row="1" CornerRadius="20,20,0,0">
+            <Grid>
+                <ScrollViewer Margin="15,15,15,15" >
+                    <local:AlignableWrapPanel HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
+                </ScrollViewer>
+            </Grid>
+
         </Border>
 
 

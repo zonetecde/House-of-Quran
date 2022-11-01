@@ -25,6 +25,9 @@ namespace House_of_Quran
 
         // Liste de ses versets
         public List<Verse> Verses { get; set; }
+
+        // La sourate entière est-elle téléchargée ?
+        public bool Downloaded { get; set; } 
     }
 
     internal class Verse

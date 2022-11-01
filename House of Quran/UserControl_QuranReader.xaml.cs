@@ -26,7 +26,7 @@ namespace House_of_Quran
             InitializeComponent();
         }
 
-        public void ShowSourate(int id)
+        public void AfficherSourate(int id)
         {
             // Set sourate Header
             txtBlock_SourateNomArabe.Text = "  سورة" + MainWindow.Quran[id].Name;
@@ -56,8 +56,9 @@ namespace House_of_Quran
                 SetUpBasicTextBlockWordEvent(textBlock_finVerset, Brushes.Green);
 
                 WrapPanel_QuranText.Children.Add(textBlock_finVerset);
-
             }
+
+            this.Tag = id;
         }
 
         private void SetUpBasicTextBlockWordEvent(TextBlock textBlock, Brush mouseHoverColor)
