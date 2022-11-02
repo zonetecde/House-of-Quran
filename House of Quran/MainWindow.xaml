@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:House_of_Quran"
         mc:Ignorable="d"
         d:Width="850" d:Height="650"
-        Title="MainWindow" FontFamily="{StaticResource Me_Quran}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized"  SizeChanged="Window_SizeChanged">
+        Title="MainWindow" FontFamily="{StaticResource QuranTaha}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing">
     <Grid>
         <ProgressBar x:Name="progressBar_downloader" Background="#FF202124" SmallChange="1" Foreground="#FF5A3088" BorderThickness="0,0,0,0"/>
 
@@ -62,6 +63,26 @@
                         </CheckBox>
 
                         <Line Height="25"/>
+                        <Grid Height="50">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="0.1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0.5*"/>
+                                <RowDefinition Height="0.4*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="De :" FontFamily="Candara" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                            <TextBlock x:Name="textBlock_maxVerset" Grid.Row="0" Grid.Column="2" Text="à :" FontFamily="Candara" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+                            <xctk:IntegerUpDown  Grid.Row="1" Grid.Column="1" Name="UpDownControl_startVerse" FontFamily="Consolas" Minimum="1" BorderBrush="#00000000" HorizontalContentAlignment="Center" ValueChanged="UpDownControl_verses_ValueChanged" />
+                            <xctk:IntegerUpDown  Grid.Row="1" Grid.Column="2" Name="UpDownControl_endVerse" FontFamily="Consolas" Minimum="1" BorderBrush="#00ABADB3" HorizontalContentAlignment="Center" ValueChanged="UpDownControl_verses_ValueChanged" />
+                        </Grid>
+
+                        <Line Height="25"/>
+
                         <Label Content="Récitateur" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
                         <ComboBox x:Name="comboBox_Recitateur" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" />
                         

@@ -9,13 +9,22 @@
       <Value Profile="(Default)">4</Value>
     </Setting>
     <Setting Name="DernierePolice" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="DerniereTaille" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">38</Value>
+      <Value Profile="(Default)">36</Value>
     </Setting>
     <Setting Name="DernierEspacement" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="DownloadList" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CurrentDownloadIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="FromWhereToWhereForEachSurah" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

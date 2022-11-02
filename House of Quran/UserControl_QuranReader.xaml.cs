@@ -1,8 +1,12 @@
-﻿using System;
+﻿using NAudio.Vorbis;
+using NAudio.Wave;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Windows.Forms.AxHost;
 
 namespace House_of_Quran
 {
@@ -43,10 +48,20 @@ namespace House_of_Quran
             {
                 for (int i = 0; i < verset.Text.Split(' ').Length; i++)
                 {
+                    string mot = MainWindow.Quran[id].Ayahs[verset.NumberInSurah - 1].Text.Split(' ')[i];
+                    
+                    if (mot.Contains("ۘ") || mot.Contains("ۖ") || mot.Contains("ۗ") || mot.Contains("ۙ") || mot.Contains("ۚ") || mot.Contains("ۛ") || mot.Contains("ۜ"))
+                    {
+                        // C'est un signe de prononciation, on le met avec le mot d'avant
+                        (WrapPanel_QuranText.Children[WrapPanel_QuranText.Children.Count - 1] as TextBlock).Text += mot;
+                        continue;
+                    }
+
                     TextBlock textBlock_mot = new TextBlock();
                     textBlock_mot.FontSize = Convert.ToInt16(textBlock_textSize.Text);
-                    string mot = MainWindow.Quran[id].Ayahs[verset.NumberInSurah - 1].Text.Split(' ')[i];
-                    if(i < verset.Text.Split(' ').Length - 1) // on ne met pas d'espacement avec un numéro de verset
+
+                    // Set le mot
+                    if (i < verset.Text.Split(' ').Length - 1) // on ne met pas d'espacement avec un numéro de verset
                         textBlock_mot.Text = mot.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
                     else
                         textBlock_mot.Text = mot.Trim() + new String(' ', 2);
@@ -55,15 +70,24 @@ namespace House_of_Quran
 
                     SetUpBasicTextBlockWordEvent(textBlock_mot, Brushes.Tomato);
 
+                    // Event
+                    textBlock_mot.Tag = (id + 1).ToString().PadLeft(3, '0') + verset.NumberInSurah.ToString().PadLeft(3, '0') + (i + 1).ToString().PadLeft(3, '0');
+                    textBlock_mot.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(PlayWordAudio);
+
                     WrapPanel_QuranText.Children.Add(textBlock_mot);
                 }
 
                 TextBlock textBlock_finVerset = new TextBlock();
-                textBlock_finVerset.Text = "﴿" + Utilities.ConvertNumeralsToArabic(verset.NumberInSurah.ToString()) + "﴾" + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
+                textBlock_finVerset.Text = "﴿" + Utilities.ConvertNumeralsToArabic(verset.NumberInSurah.ToString()) + "﴾    " + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
                 textBlock_finVerset.FontSize = Convert.ToInt16(textBlock_textSize.Text);
                 textBlock_finVerset.Cursor = Cursors.Hand;
                 textBlock_finVerset.ToolTip = verset.NumberInSurah;
                 SetUpBasicTextBlockWordEvent(textBlock_finVerset, Brushes.Green);
+
+                // Event
+                textBlock_finVerset.Tag = (id + 1).ToString().PadLeft(3, '0') + verset.NumberInSurah.ToString().PadLeft(3, '0');
+                textBlock_finVerset.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(PlayVerseAudio);
+
                 // les numéros toujours vont s'afficher avec la police me_quran
                 if (!MainWindow.CurrentFont.ToString().Contains("ScheherazadeRegOT") && !MainWindow.CurrentFont.ToString().Contains("Othmani"))
                     textBlock_finVerset.FontFamily = (FontFamily)FindResource("Me_Quran");
@@ -74,16 +98,88 @@ namespace House_of_Quran
             this.Tag = id;
         }
 
+
+        private  async void PlayWordAudio(object sender, MouseButtonEventArgs e)
+        {
+            string audio = (sender as TextBlock).Tag.ToString(); // 001001001
+            string file = @"data\quran\" + MainWindow.Quran[(int)this.Tag].EnglishName + @"\wbw\" + audio.Remove(0, 3).Insert(3, "_") + ".mp3";
+
+            // ce n'est pas un mot
+            if (!(sender as TextBlock).Text.Contains("۞") && !(sender as TextBlock).Text.Contains("۩"))
+            {
+
+                // pause tout les audios actuellement en cours
+                AudioUtilities.PauseAllPlayingAudio();
+
+                // Audio téléchargé? 
+                if (File.Exists(file))
+                {
+                    // Play depuis fichier
+                    AudioUtilities.PlayMp3FromLocalFile(file, new List<TextBlock> { (sender as TextBlock) });
+                }
+                else
+                {
+                    // Play depuis un lien
+                    var url = "https://audio.qurancdn.com/wbw/" + audio.Insert(3, "_").Insert(7, "_") + ".mp3";
+                    await AudioUtilities.PlayAudioFromUrl(url, new List<TextBlock> { (sender as TextBlock) });
+                }
+            }
+
+        }
+
+        private async void PlayVerseAudio(object sender, MouseButtonEventArgs e)
+        {
+            string audio = (sender as TextBlock).Tag.ToString(); // 001001
+            int recitateurIndex = MainWindow._MainWindow.comboBox_Recitateur.SelectedIndex;
+            string extensionRecitateur = MainWindow._MainWindow.Recitateurs[recitateurIndex].Extension; // .ogg ou .mp3
+
+            AudioUtilities.PauseAllPlayingAudio();
+
+            string file = @"data\quran\" + MainWindow.Quran[(int)this.Tag].EnglishName + @"\verse\" + recitateurIndex + "-" + audio.Remove(0, 3) + extensionRecitateur;
+
+            // Récupère tous les TextBlock du verset en question
+            List<TextBlock> verseWords = new List<TextBlock>();
+            for (int i = WrapPanel_QuranText.Children.IndexOf(sender as TextBlock) - 1; i >= 0; i--)
+            {
+                if ((WrapPanel_QuranText.Children[i] as TextBlock).Text.Contains("﴾"))
+                    break;
+
+                verseWords.Add(WrapPanel_QuranText.Children[i] as TextBlock);
+            }
+
+            // Audio téléchargé?
+            if (File.Exists(file))
+            {
+                // Play depuis fichier
+                if(extensionRecitateur == ".mp3")
+                     AudioUtilities.PlayMp3FromLocalFile(file, verseWords);
+                else // ogg
+                {
+                    await AudioUtilities.PlayOggFromLocalFile(file, verseWords);
+                }
+            }
+            else
+            {
+                // Play depuis internet
+                string lien = MainWindow._MainWindow.Recitateurs[recitateurIndex].Lien + audio + extensionRecitateur;
+
+                await AudioUtilities.PlayOggFileFromUrl(lien, verseWords);
+            }
+        }
+
+        
         private void SetUpBasicTextBlockWordEvent(TextBlock textBlock, Brush mouseHoverColor)
         {         
             textBlock.MouseEnter += (sender, e) =>
             {
-                textBlock.Foreground = mouseHoverColor;
+                if(textBlock.Foreground != AudioUtilities.COLOR_AYAH_BEING_PLAYED)
+                    textBlock.Foreground = mouseHoverColor;
             };
 
             textBlock.MouseLeave += (sender, e) =>
             {
-                textBlock.Foreground = Brushes.Black;
+                if (textBlock.Foreground != AudioUtilities.COLOR_AYAH_BEING_PLAYED)
+                    textBlock.Foreground = Brushes.Black;
             };
         }
 
@@ -177,6 +273,10 @@ namespace House_of_Quran
             }
         }
 
+        /// <summary>
+        /// Change la police d'écriture des nombres pour seulement certaines qui les prends en charge
+        /// </summary>
+        /// <param name="newOne"></param>
         internal void CheckFontOfNumber(FontFamily newOne)
         {
             foreach (TextBlock textBlock_mot in WrapPanel_QuranText.Children)
@@ -188,6 +288,33 @@ namespace House_of_Quran
                         textBlock_mot.FontFamily = newOne;
             }
 
+        }
+
+        private void Border_AudioControl_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Border_Controles.Opacity = 1;
+        }
+
+        private void Border_AudioControl_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Animation.HideAnimation(Border_Controles);
+        }
+
+        /// <summary>
+        /// Affiche uniquement les versets de debut à fin
+        /// </summary>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        internal void BorneChanged(int? debut, int? fin)
+        {
+            foreach(TextBlock txtBlock in WrapPanel_QuranText.Children)
+            {
+                int vNumber = Convert.ToInt16(txtBlock.Tag.ToString().Substring(3, 3));
+                if (vNumber < debut || vNumber > fin)
+                    txtBlock.Visibility = Visibility.Collapsed;
+                else
+                    txtBlock.Visibility = Visibility.Visible;
+            }
         }
     }
 }

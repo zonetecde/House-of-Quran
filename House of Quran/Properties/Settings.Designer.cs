@@ -49,7 +49,7 @@ namespace House_of_Quran.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public int DernierePolice {
             get {
                 return ((int)(this["DernierePolice"]));
@@ -61,7 +61,7 @@ namespace House_of_Quran.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("38")]
+        [global::System.Configuration.DefaultSettingValueAttribute("36")]
         public int DerniereTaille {
             get {
                 return ((int)(this["DerniereTaille"]));
@@ -73,13 +73,47 @@ namespace House_of_Quran.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int DernierEspacement {
             get {
                 return ((int)(this["DernierEspacement"]));
             }
             set {
                 this["DernierEspacement"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection DownloadList {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["DownloadList"]));
+            }
+            set {
+                this["DownloadList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CurrentDownloadIndex {
+            get {
+                return ((int)(this["CurrentDownloadIndex"]));
+            }
+            set {
+                this["CurrentDownloadIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection FromWhereToWhereForEachSurah {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["FromWhereToWhereForEachSurah"]));
+            }
+            set {
+                this["FromWhereToWhereForEachSurah"] = value;
             }
         }
     }

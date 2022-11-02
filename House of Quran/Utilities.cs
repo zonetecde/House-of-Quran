@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using NAudio.Wave;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,6 +47,8 @@ namespace House_of_Quran
             File.WriteAllText(@"data\recitateur.json", JsonConvert.SerializeObject(recitateurs, Formatting.Indented));
         }
 
+
+
         internal static void GetQuranFromInternet()
         {
             WebClient wc = new WebClient();
@@ -58,8 +61,10 @@ namespace House_of_Quran
             //for (int i = 1; i < myDeserializedClass.data.Surahs.Count; i++)
             //{
             //    myDeserializedClass.data.Surahs[i].Ayahs[0].Text = myDeserializedClass.data.Surahs[i].Ayahs[0].Text.Substring(38, myDeserializedClass.data.Surahs[i].Ayahs[0].Text.Length - 38).Trim();
+            //    myDeserializedClass.data.Surahs[i].DownloadedRecitateur = new List<int>();
             //}
-            // il faut ajouter le setup de downloaded récitateur = new List<>()
+            ////Il faut faire attention à pas enlever At Tawba car pas de bismillah!!
+
             //File.WriteAllText(@"data\quran.json", JsonConvert.SerializeObject(myDeserializedClass.data.Surahs, Formatting.Indented));
         }
 
