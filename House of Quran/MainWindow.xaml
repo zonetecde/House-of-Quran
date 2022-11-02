@@ -54,11 +54,27 @@
                         </Grid>
 
                         <Line Height="25"/>
+                        <ComboBox x:Name="comboBox_Sourate" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" SelectionChanged="comboBox_Sourate_SelectionChanged"/>
+                        <Line Height="25"/>
 
-                        <CheckBox x:Name="checkBox_HorsLigne" Grid.Row="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="5,0,0,104" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="checkBox_HorsLigne_Checked" Unchecked="checkBox_HorsLigne_Unchecked">
+                        <CheckBox x:Name="checkBox_HorsLigne" Grid.Row="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="5,0,0,0" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="checkBox_HorsLigne_Checked" Unchecked="checkBox_HorsLigne_Unchecked" >
                             <TextBlock Text="Rendre disponible hors-ligne" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="-3,0,2,0" />
-
                         </CheckBox>
+
+                        <Line Height="25"/>
+                        <Label Content="Récitateur" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
+                        <ComboBox x:Name="comboBox_Recitateur" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" />
+                        
+                        <Line Height="25"/>
+                        <Label Content="Police" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
+                        <ComboBox x:Name="comboBox_font" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" SelectedIndex="0">
+                            <ComboBoxItem Content="Me_Quran"/>
+                            <ComboBoxItem Content="Al_Qalam_Quran_Majeed"/>
+                            <ComboBoxItem Content="noorehidayat-Regular"/>
+                            <ComboBoxItem Content="Othmani"/>
+                            <ComboBoxItem Content="ScheherazadeRegOT"/>
+                            <ComboBoxItem Content="QuranTaha"/>
+                        </ComboBox>
                     </StackPanel>
                 </Border>
             </Grid>

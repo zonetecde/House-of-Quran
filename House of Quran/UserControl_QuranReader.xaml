@@ -24,7 +24,9 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.75*"/>
+                <ColumnDefinition Width="0.185*"/>
+                <ColumnDefinition Width="0.325*"/>
+                <ColumnDefinition Width="0.185*"/>
                 <ColumnDefinition Width="0.75*"/>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="0.75*"/>
@@ -33,13 +35,13 @@
                 <ColumnDefinition Width="0.185*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="2" Background="White" CornerRadius="10,10,0,0" Margin="-0.75,0,-0.75,-0.75">
+            <Border Grid.Column="4" Background="White" CornerRadius="10,10,0,0" Margin="-0.75,0,-0.75,-0.75">
                 <Viewbox>
                     <TextBlock x:Name="txtBlock_SourateNomArabe" Text="سورة الفاتحة"  Margin="0,-5,0,-5"/>
                 </Viewbox>
             </Border>
 
-            <Border Grid.Column="5" Background="White" CornerRadius="3.5,3.5,0,0" Margin="0,0,0,-0.5">
+            <Border Grid.Column="1" Background="White" CornerRadius="3.5,3.5,0,0" Margin="0,0,0,-0.5">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.15*"/>
@@ -48,22 +50,64 @@
                         <ColumnDefinition Width="0.3*"/>
                         <ColumnDefinition Width="0.15*"/>
                     </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0.05*"/>
+                        <RowDefinition Height="0.35*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
 
-                    <Viewbox Grid.Column="1">
+                    <Viewbox  Grid.Row="1" Grid.Column="2">
+                        <TextBlock Text="Espacement"  FontFamily="Consolas"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="3" Grid.Column="1">
+                        <Button x:Name="button_espacementMoins" Content="—" FontFamily="Consolas" BorderBrush="White" Background="White" Click="Button_EspacementChanger_Click" />
+                    </Viewbox>
+
+                    <Viewbox  Grid.Row="3" Grid.Column="3">
+                        <Button x:Name="button_espacementPlus"  Content="+" FontFamily="Consolas"  BorderBrush="White" Background="White" Click="Button_EspacementChanger_Click"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="3" Grid.Column="2">
+                        <TextBlock x:Name="textBlock_espacement"  Text="10" FontFamily="Consolas" Margin="5,0,5,0" PreviewMouseWheel="textBlock_espacement_PreviewMouseWheel" />
+                    </Viewbox>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="7" Background="White" CornerRadius="3.5,3.5,0,0" Margin="0,0,0,-0.5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.15*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="0.15*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="0.05*"/>
+                        <RowDefinition Height="0.35*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+
+                    <Viewbox  Grid.Row="1" Grid.Column="2">
+                        <TextBlock Text="Taille"  FontFamily="Consolas"/>
+                    </Viewbox>
+
+                    <Viewbox Grid.Row="3" Grid.Column="1">
                         <Button x:Name="button_fontSizeDown" Content="—" FontFamily="Consolas" BorderBrush="White" Background="White"  Click="Button_SizeChanger_Click" />
                     </Viewbox>
 
-                    <Viewbox Grid.Column="3">
+                    <Viewbox  Grid.Row="3" Grid.Column="3">
                         <Button x:Name="button_fontSizeUp" Content="+" FontFamily="Consolas"  BorderBrush="White" Background="White" Click="Button_SizeChanger_Click"/>
                     </Viewbox>
-                    
-                    <Viewbox Grid.Column="2">
+
+                    <Viewbox Grid.Row="3" Grid.Column="2">
                         <TextBlock x:Name="textBlock_textSize" Text="38" FontFamily="Consolas" Margin="5,0,5,0" PreviewMouseWheel="textBlock_textSize_PreviewMouseWheel" />
                     </Viewbox>
                 </Grid>
             </Border>
             
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
@@ -76,7 +120,7 @@
                 </Border>
             </Grid>
 
-            <Grid Grid.Column="3">
+            <Grid Grid.Column="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*"/>
                     <RowDefinition Height="1*"/>
@@ -86,6 +130,8 @@
                         <TextBlock x:Name="txtBlock_typeSourate" Text="Mecquoise" FontFamily="Calibri Light" Margin="0,0,0,-2"/>
                     </Viewbox>
                 </Border>
+                
+            
             </Grid>
 
         </Grid>

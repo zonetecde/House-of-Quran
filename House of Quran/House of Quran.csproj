@@ -10,16 +10,44 @@
 
   <ItemGroup>
     <None Remove="fonts\Al Qalam Quran Majeed.ttf" />
+    <None Remove="fonts\ArbFONTS-pdms-saleem-quranfont.ttf" />
     <None Remove="fonts\Me Quran.ttf" />
+    <None Remove="fonts\noorehidayat Regular.ttf" />
+    <None Remove="fonts\othmani.ttf" />
+    <None Remove="fonts\QuranTaha.ttf" />
+    <None Remove="fonts\ScheherazadeRegOT.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="fonts\noorehidayat Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="fonts\Al Qalam Quran Majeed.ttf" />
+    <Resource Include="fonts\ArbFONTS-pdms-saleem-quranfont.ttf" />
     <Resource Include="fonts\Me Quran.ttf" />
+    <Resource Include="fonts\othmani.ttf" />
+    <Resource Include="fonts\QuranTaha.ttf" />
+    <Resource Include="fonts\ScheherazadeRegOT.ttf" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

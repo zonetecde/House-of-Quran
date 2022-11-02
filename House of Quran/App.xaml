@@ -6,6 +6,10 @@
     <Application.Resources>
         <FontFamily x:Key="Me_Quran">fonts/Me Quran.ttf#Me_Quran</FontFamily>
         <FontFamily x:Key="Al_Qalam_Quran_Majeed">fonts/Al Qalam Quran Majeed.ttf#Al Qalam Quran Majeed Web</FontFamily>
+        <FontFamily x:Key="noorehidayat-Regular">fonts/noorehidayat Regular.ttf#noorehidayat</FontFamily>
+        <FontFamily x:Key="Othmani">fonts/othmani.ttf#Othmani</FontFamily>
+        <FontFamily x:Key="ScheherazadeRegOT">fonts/ScheherazadeRegOT.ttf#Scheherazade</FontFamily>
+        <FontFamily x:Key="QuranTaha">fonts/QuranTaha.ttf#QuranTaha</FontFamily>
 
         <SolidColorBrush x:Key="StandardBorderBrush" Color="#888" />
         <SolidColorBrush x:Key="StandardBackgroundBrush" Color="Black" />
