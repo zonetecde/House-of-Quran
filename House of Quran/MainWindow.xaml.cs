@@ -48,6 +48,10 @@ namespace House_of_Quran
 
             InitializeComponent();
 
+            checkBox_tajweed.Checked -= checkBox_tajweed_Checked;
+            checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
+            checkBox_tajweed.Checked += checkBox_tajweed_Checked;
+
             _MainWindow = this;
 
             InitFont();
@@ -181,6 +185,7 @@ namespace House_of_Quran
         {
             //Utilities.GetQuranFromInternet();
             //Utilities.RecitateurToJson();
+            //Utilities.GetQuran(); //from tanzil.net
 
             // Est-ce que le dernier téléchargement était fini ?
             ContinueDownloading();
@@ -518,6 +523,14 @@ namespace House_of_Quran
             }
 
             Properties.Settings.Default.Save();
+        }
+
+        private void checkBox_tajweed_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Tajweed = checkBox_tajweed.IsChecked.Value;
+            Properties.Settings.Default.Save();
+
+            userControl_QuranReader.ApplyTajweed(checkBox_tajweed.IsChecked.Value);
         }
     }
 }

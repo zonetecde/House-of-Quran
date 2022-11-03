@@ -29,6 +29,7 @@ namespace House_of_Quran
                 .Replace('9', '٩');
         }
 
+
         internal static bool CheckForInternetConnection(int timeoutMs = 4500, string url = null)
         {
             try
@@ -157,6 +158,51 @@ namespace House_of_Quran
             }
 
             return matched;
+        }
+
+        internal static string ToUnicodeString(this string str)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var c in str)
+            {
+                sb.Append("\\u" + ((int)c).ToString("X4"));
+            }
+            return sb.ToString();
+        }
+
+        internal static string RemoveDiacritics(string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder
+                .ToString()
+                .Normalize(NormalizationForm.FormC);
+        }
+
+        internal static void GetQuran()
+        {
+            List<string> lines = File.ReadAllLines(@"data\dev\quran-uthmani.txt").ToList();
+            int i = 0;
+            foreach(Surah s in MainWindow.Quran)
+            {
+                foreach(Ayah a in s.Ayahs)
+                {
+                    lines[i] = lines[i].Substring(lines[i].LastIndexOf("|") + 1, lines[i].Length - (lines[i].LastIndexOf("|") + 1));
+                    a.Text = lines[i];
+                    i++;
+                }
+            }
         }
     }
 }

@@ -29,6 +29,7 @@ namespace House_of_Quran
     {
         private int LastTextBlockPlayed = -1;
         internal static Action<object, RoutedEventArgs> PlayNext;
+        internal static Action<object, RoutedEventArgs> PlayPause;
 
         public UserControl_QuranReader()
         {
@@ -38,6 +39,13 @@ namespace House_of_Quran
             textBlock_espacement.Text = Properties.Settings.Default.DernierEspacement.ToString();
 
             PlayNext = Button_Right_Click;
+            PlayPause = Button_PlayPause_Click;
+
+            T_Checker.Elapsed += (sender, e) =>
+            {
+                i = 0;
+            };
+            T_Checker.Start();
         }
 
         public void AfficherSourate(int id)
@@ -52,6 +60,7 @@ namespace House_of_Quran
             // Affiche les versets
             foreach (Ayah verset in MainWindow.Quran[id].Ayahs)
             {
+                int toSub = 0;
                 for (int i = 0; i < verset.Text.Split(' ').Length; i++)
                 {
                     string mot = MainWindow.Quran[id].Ayahs[verset.NumberInSurah - 1].Text.Split(' ')[i];
@@ -63,21 +72,53 @@ namespace House_of_Quran
                         continue;
                     }
 
+                    // Lorsque l'on a ya ayouha on le met en un mot
+                    // يَٰٓأَيُّهَا
+                    // يَا أَيُّهَا
+                    if(MainWindow.Quran[id].Ayahs[verset.NumberInSurah - 1].Text.Split(' ').Length - 1 > i + 1)
+                        if(mot == "يَا" && MainWindow.Quran[id].Ayahs[verset.NumberInSurah - 1].Text.Split(' ')[i + 1] == "أَيُّهَا")
+                        {
+                            mot = "يَٰٓأَيُّهَا";
+                            toSub++;
+                            i++;
+                        }
+
                     TextBlock textBlock_mot = new TextBlock();
                     textBlock_mot.FontSize = Convert.ToInt16(textBlock_textSize.Text);
+                    textBlock_mot.Cursor = Cursors.Hand;              
 
                     // Set le mot
                     if (i < verset.Text.Split(' ').Length - 1) // on ne met pas d'espacement avec un numéro de verset
-                        textBlock_mot.Text = mot.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
+                        mot = mot.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
                     else
-                        textBlock_mot.Text = mot.Trim() + new String(' ', 2);
+                        mot = mot.Trim() + new String(' ', 2);
 
-                    textBlock_mot.Cursor = Cursors.Hand;
+                    textBlock_mot.Inlines.Add(new Run() { Tag = mot, Text = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? String.Empty : mot });
 
-                    SetUpBasicTextBlockWordEvent(textBlock_mot, Brushes.Tomato);
+
+                    var bitmapImage = new BitmapImage();
+                    if (MainWindow.HaveInternet)
+                    {
+                        bitmapImage.BeginInit();
+                        string url = "https://static.qurancdn.com/images/w/rq-color/" + (id + 1) + "/" + verset.NumberInSurah + "/" + (i + 1) + ".png";
+                        bitmapImage.UriSource = new Uri(url);
+                        bitmapImage.EndInit();
+                    }
+
+                    textBlock_mot.Inlines.Add(new InlineUIContainer() 
+                    { 
+                        Child = new Image()
+                        {
+                             Source = bitmapImage,
+                             Width = Utilities.RemoveDiacritics(mot).Length * 10,
+                             Height = 80,
+                             Stretch = Stretch.Uniform,
+                             Visibility = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? Visibility.Visible : Visibility.Collapsed
+                        }
+                    });
 
                     // Event
-                    textBlock_mot.Tag = (id + 1).ToString().PadLeft(3, '0') + verset.NumberInSurah.ToString().PadLeft(3, '0') + (i + 1).ToString().PadLeft(3, '0');
+                    textBlock_mot.Tag = (id + 1).ToString().PadLeft(3, '0') + verset.NumberInSurah.ToString().PadLeft(3, '0') + ((i - toSub )+ 1).ToString().PadLeft(3, '0');
                     textBlock_mot.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(PlayWordAudio);
 
                     WrapPanel_QuranText.Children.Add(textBlock_mot);
@@ -101,6 +142,7 @@ namespace House_of_Quran
                 WrapPanel_QuranText.Children.Add(textBlock_finVerset);
             }
 
+            LastTextBlockPlayed = -1;
             this.Tag = id;
         }
 
@@ -215,13 +257,28 @@ namespace House_of_Quran
         private void Button_SizeChanger_Click(object sender, RoutedEventArgs e)
         {
             int currentSize = Convert.ToInt16(textBlock_textSize.Text);
-            currentSize = ApplyNewValue((sender as Button).Content.ToString(), currentSize);
+            if(sender!=null)
+                currentSize = ApplyNewValue((sender as Button).Content.ToString(), currentSize);
 
             textBlock_textSize.Text = currentSize.ToString();
 
             foreach (TextBlock textBlock_mot in WrapPanel_QuranText.Children)
             {
-                textBlock_mot.FontSize = Convert.ToInt16(textBlock_textSize.Text);
+                if(MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value && !String.IsNullOrEmpty(textBlock_mot.Text))
+                    textBlock_mot.FontSize = (Convert.ToInt16(textBlock_textSize.Text) * 2.2) / 2;
+                else
+                    textBlock_mot.FontSize = Convert.ToInt16(textBlock_textSize.Text);
+
+
+                try
+                {
+                    // la size est dans la width du tajweed aussi
+                    int i = Utilities.RemoveDiacritics((textBlock_mot.Inlines.ElementAt(0) as Run).Tag.ToString()).Length;
+                    ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Width = (i * Convert.ToInt16(textBlock_textSize.Text)) / 2;
+                    ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Height = (100 + (textBlock_textSize.Text.Length > 1 ? (Convert.ToInt16(textBlock_textSize.Text[0])) : 0.5)) / 2;
+                }
+                catch { }
+                
             }
 
             Properties.Settings.Default.DerniereTaille = currentSize;
@@ -236,7 +293,8 @@ namespace House_of_Quran
         private void Button_EspacementChanger_Click(object sender, RoutedEventArgs e)
         {
             int currentSize = Convert.ToInt16(textBlock_espacement.Text);
-            currentSize = ApplyNewValue((sender as Button).Content.ToString(), currentSize);
+            if (sender != null)
+                currentSize = ApplyNewValue((sender as Button).Content.ToString(), currentSize);
 
             textBlock_espacement.Text = currentSize.ToString();
 
@@ -244,10 +302,18 @@ namespace House_of_Quran
             {
                 TextBlock textBlock_mot = (TextBlock)WrapPanel_QuranText.Children[i];
 
-                if (!(WrapPanel_QuranText.Children[i+1] as TextBlock).Text.Contains("﴾")) // on ne met pas d'espace avant un numéro de verset
-                    textBlock_mot.Text = textBlock_mot.Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
+                if (!String.IsNullOrEmpty((WrapPanel_QuranText.Children[i + 1] as TextBlock).Text))
+                {
+                    (textBlock_mot.Inlines.ElementAt(0) as Run).Text = textBlock_mot.Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
+                    
+                    if (String.IsNullOrEmpty(textBlock_mot.Text))
+                        ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Margin = new Thickness(Convert.ToInt16(textBlock_espacement.Text), 0, Convert.ToInt16(textBlock_espacement.Text), 0);
+
+                }
                 else
+                {
                     textBlock_mot.Text = textBlock_mot.Text.Trim() + new String(' ', 2);
+                }
             }
 
             Properties.Settings.Default.DernierEspacement = currentSize;
@@ -341,7 +407,7 @@ namespace House_of_Quran
             }
         }
 
-        internal static bool ToogglePlayPauseAudio = true;
+        internal static bool ToogglePlayPauseAudio = false;
 
         /// <summary>
         /// Play/Pause audio
@@ -352,16 +418,23 @@ namespace House_of_Quran
         {
             // ToogglePlayPauseAudio == false : pause
             // ToogglePlayPauseAudio == true : play
+            ToogglePlayPauseAudio = !ToogglePlayPauseAudio;
+
             if (ToogglePlayPauseAudio)
             {
+                LastWasAudio = true;
                 GetNextTextBlockIndexToPlay(1);
-
                 PlayCurrentIndex();
+                button_playpause.Foreground = Brushes.DarkGreen;
+
             }
             else
-                AudioUtilities.PauseAudio();
+            {
 
-            ToogglePlayPauseAudio = !ToogglePlayPauseAudio;
+                button_playpause.Foreground = Brushes.Red;
+                AudioUtilities.PauseAllPlayingAudio();
+            }
+
         }
 
         private void UserControl_KeyDown(object sender, KeyEventArgs e)
@@ -379,8 +452,13 @@ namespace House_of_Quran
 
         private void Button_Left_Click(object sender, RoutedEventArgs e)
         {
+            if (ToogglePlayPauseAudio == false)
+            {
+                button_playpause.Foreground = Brushes.DarkGreen;
+                ToogglePlayPauseAudio = true;
+            }
+
             // Play mot/sourate d'avant
-            ToogglePlayPauseAudio = false;
             int p = LastTextBlockPlayed;
             try
             {
@@ -429,21 +507,120 @@ namespace House_of_Quran
                 PlayWordAudio((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock), null);
         }
 
+        private bool LastWasAudio = false;
+        System.Timers.Timer T_Repeter = new System.Timers.Timer();
+        System.Timers.Timer T_Checker = new System.Timers.Timer(200);
+        int i = 0;
+
         internal void Button_Right_Click(object sender, RoutedEventArgs e)
         {
-            ToogglePlayPauseAudio = false;
+            i++;
+            if (i == 2)
+                return;
 
-            int p = LastTextBlockPlayed;
-            try
+            if (ToogglePlayPauseAudio == false)
             {
-                GetNextTextBlockIndexToPlay(1);
+                button_playpause.Foreground = Brushes.DarkGreen;
+                ToogglePlayPauseAudio = true;
             }
-            catch { LastTextBlockPlayed = p; }
 
-            if (LastTextBlockPlayed >= WrapPanel_QuranText.Children.Count)
-                LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
+            // Si on est dans une zone de répétion et qu'un audio vient d'être joué (= on doit laisser un blanc)
+            if (MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value && LastWasAudio)
+            {
+                // La dernière chose joué n'était pas un audio mais une zone de répétion
+                LastWasAudio = false;
 
-            PlayCurrentIndex();
+                // Si le dernier audio n'avait pas de longueur cela veut dire que c'est le premier lancement, on joue donc un audio normalement
+                if (AudioUtilities.LastAudioPlayedDuration == 0)
+                {
+                    Button_Right_Click(this, null);
+                    return;
+                }
+                else
+                {
+                    // Timer du temps à faire le blanc
+                    T_Repeter = new System.Timers.Timer(AudioUtilities.LastAudioPlayedDuration);
+
+                    // Fait le blanc et joue l'audio suivant lorsque celui ci est terminé
+                    T_Repeter.Elapsed += (sender, e) =>
+                    {
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (!AudioUtilities.IsAnyAudioPlaying())
+                            {
+                                T_Repeter.Stop();
+                                Button_Right_Click(this, null);
+                            }
+                        });
+
+                    };
+
+                    T_Repeter.Start();
+                }
+            }
+            else 
+            {
+                LastWasAudio = true; // On va jouer un audio          
+
+                // Fin de la sourate on s'arrête
+                if (LastTextBlockPlayed == WrapPanel_QuranText.Children.Count - 1)
+                {
+                    LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
+                    button_playpause.Background = Brushes.Transparent;
+                    AudioUtilities.PauseAudio();
+                    ToogglePlayPauseAudio = false;
+                    return;
+                }
+
+                // récupère la nouvelle position à jouer
+                int p = LastTextBlockPlayed;
+
+                try
+                {
+                    GetNextTextBlockIndexToPlay(1);
+                }
+                catch { LastTextBlockPlayed = p; }
+
+                // vérifie que la position n'est pas hors des limites
+                if (LastTextBlockPlayed >= WrapPanel_QuranText.Children.Count)
+                {
+                    LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
+                }
+
+                // Si on est actuellement dans une pose de répétition on l'enlève pour pouvoir jouer l'audio
+                if (T_Repeter.Enabled)
+                    T_Repeter.Stop();
+
+                // Joue l'audio
+                PlayCurrentIndex();
+            }
+        }
+
+        internal void ApplyTajweed(bool value)
+        {
+            foreach(TextBlock txtBlock in WrapPanel_QuranText.Children)
+            {
+                try
+                {
+                    if (value)
+                    {
+
+                        ((txtBlock.Inlines.ElementAt(1) as InlineUIContainer).Child).Visibility = Visibility.Visible;
+                        (txtBlock.Inlines.ElementAt(0) as Run).Text = String.Empty;
+                    }
+                    else
+                    {
+                        ((txtBlock.Inlines.ElementAt(1) as InlineUIContainer).Child).Visibility = Visibility.Collapsed;
+                        (txtBlock.Inlines.ElementAt(0) as Run).Text = (txtBlock.Inlines.ElementAt(0) as Run).Tag.ToString();
+                    }
+                }
+                catch { 
+                }
+                
+            }
+
+            Button_SizeChanger_Click(null, null);
+            Button_EspacementChanger_Click(null, null);
         }
     }
 }

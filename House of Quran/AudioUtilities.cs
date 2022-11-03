@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using NAudio.Utils;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,6 +24,8 @@ namespace House_of_Quran
         internal static readonly System.Windows.Media.SolidColorBrush COLOR_AYAH_BEING_PLAYED = System.Windows.Media.Brushes.Red;
         internal static readonly System.Windows.Media.SolidColorBrush COLOR_AYAH = System.Windows.Media.Brushes.Black;
 
+        internal static double LastAudioPlayedDuration = 0;
+
         internal static async Task PlayOggFileFromUrl(string lien, List<TextBlock> verseWords)
         {
             var req = System.Net.WebRequest.Create(lien);
@@ -32,17 +36,16 @@ namespace House_of_Quran
                 {
                     waveOut.PlaybackStopped += (sender, e) =>
                     {
+                        LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
+
                         if (verseWords != null)
                             verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
 
                         waveOut.Dispose();
                         vorbisStream.Dispose();
-                        if (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop&& UserControl_QuranReader.ToogglePlayPauseAudio)
-                            UserControl_QuranReader.PlayNext(null, null);
-                        else
-                            ForcedStop = false;
 
-                        UserControl_QuranReader.ToogglePlayPauseAudio = true;
+                        PlayNextAudioIfNeeded();
+
                     };
 
                     waveOut.Init(vorbisStream);
@@ -73,18 +76,16 @@ namespace House_of_Quran
             {
                 waveOut.PlaybackStopped += (sender, e) =>
                 {
+                    LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
+
                     if (verseWords != null)
                         verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
 
                     waveOut.Dispose();
                     vorbisStream.Dispose();
 
-                    if (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop&& UserControl_QuranReader.ToogglePlayPauseAudio)
-                        UserControl_QuranReader.PlayNext(null, null);
-                    else
-                        ForcedStop = false;
+                    PlayNextAudioIfNeeded();
 
-                    UserControl_QuranReader.ToogglePlayPauseAudio = true;
                 };
 
                 waveOut.Init(vorbisStream);
@@ -108,11 +109,14 @@ namespace House_of_Quran
         private static WaveOut wo = new WaveOut();
         private static WasapiOut wao = new WasapiOut();
 
+        private static bool PauseEvent = true;
+
         internal static void PauseAudio()
         {
             woE.Pause();
             wo.Pause();
             wao.Pause();
+            ForcedStop = true;
         }
 
         internal static void PlayAudio()
@@ -151,6 +155,8 @@ namespace House_of_Quran
 
             waveOut.PlaybackStopped += (sender, e) =>
             {
+                LastAudioPlayedDuration = Mp3Reader.TotalTime.TotalMilliseconds;
+
                 t_keepColor.Stop();
 
                 if (verseWords != null)
@@ -158,12 +164,8 @@ namespace House_of_Quran
 
                 waveOut.Dispose();
 
-                if (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && UserControl_QuranReader.ToogglePlayPauseAudio)
-                    UserControl_QuranReader.PlayNext(null, null);
-                else
-                    ForcedStop = false;
+                PlayNextAudioIfNeeded();
 
-                UserControl_QuranReader.ToogglePlayPauseAudio = true;
             };
         }
 
@@ -175,19 +177,16 @@ namespace House_of_Quran
                 wao = wo;
                 wo.PlaybackStopped += (sender, e) =>
                 {
+                    
+                    LastAudioPlayedDuration = mf.TotalTime.TotalMilliseconds; 
+
                     wo.Dispose();
                     mf.Dispose();
 
                     if (verseWords != null)
                         verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
 
-
-                    if (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && UserControl_QuranReader.ToogglePlayPauseAudio)
-                        UserControl_QuranReader.PlayNext(null, null);
-                    else
-                        ForcedStop = false;
-
-                    UserControl_QuranReader.ToogglePlayPauseAudio = true;
+                    PlayNextAudioIfNeeded();
                 };
 
                 wo.Init(mf);
@@ -206,6 +205,25 @@ namespace House_of_Quran
             }
         }
 
+        private static void PlayNextAudioIfNeeded()
+        {
+            if (((MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && UserControl_QuranReader.ToogglePlayPauseAudio && MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value))
+            || (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && (UserControl_QuranReader.ToogglePlayPauseAudio)))
+            {
+                UserControl_QuranReader.PlayNext(null, null);
+            }
+            else
+            {
+                ForcedStop = false;
+            }
+
+            // pas de lecture automatique est audio finit = pause
+            if(!MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked.Value && UserControl_QuranReader. ToogglePlayPauseAudio && !IsAnyAudioPlaying())
+            {
+                UserControl_QuranReader.PlayPause(null, null);
+            }
+        }
+
         private static bool ForcedStop = false;
 
         /// <summary>
@@ -217,6 +235,11 @@ namespace House_of_Quran
             woE.Stop();
             wo.Stop();
             wao.Stop();
+        }
+
+        internal static bool IsAnyAudioPlaying()
+        {
+            return wo.PlaybackState == PlaybackState.Playing || woE.PlaybackState == PlaybackState.Playing || wao.PlaybackState == PlaybackState.Playing;
         }
     }
 }

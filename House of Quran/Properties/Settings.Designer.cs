@@ -116,5 +116,17 @@ namespace House_of_Quran.Properties {
                 this["FromWhereToWhereForEachSurah"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Tajweed {
+            get {
+                return ((bool)(this["Tajweed"]));
+            }
+            set {
+                this["Tajweed"] = value;
+            }
+        }
     }
 }
