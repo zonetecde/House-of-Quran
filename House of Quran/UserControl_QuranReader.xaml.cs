@@ -14,11 +14,13 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static System.Windows.Forms.AxHost;
 using MessageBox = Xceed.Wpf.Toolkit.MessageBox;
+using Timer = System.Timers.Timer;
 
 namespace House_of_Quran
 {
@@ -100,7 +102,7 @@ namespace House_of_Quran
                     if (MainWindow.HaveInternet)
                     {
                         bitmapImage.BeginInit();
-                        string url = "https://static.qurancdn.com/images/w/rq-color/" + (id + 1) + "/" + verset.NumberInSurah + "/" + (i + 1) + ".png";
+                        string url = "https://static.qurancdn.com/images/w/rq-color/" + (id + 1) + "/" + verset.NumberInSurah + "/" + ((i + 1) - toSub) + ".png";
                         bitmapImage.UriSource = new Uri(url);
                         bitmapImage.EndInit();
                     }
@@ -149,13 +151,20 @@ namespace House_of_Quran
 
         private  async void PlayWordAudio(object sender, MouseButtonEventArgs e)
         {
+            if (!TogglePlayPauseAudio)
+            {
+                TogglePlayPauseAudio = true;
+                button_playpause.Foreground = Brushes.DarkGreen;
+                LastWasAudio = true;
+            }
+
             LastTextBlockPlayed = WrapPanel_QuranText.Children.IndexOf((sender as TextBlock));
 
             string audio = (sender as TextBlock).Tag.ToString(); // 001001001
             string file = @"data\quran\" + MainWindow.Quran[(int)this.Tag].EnglishName + @"\wbw\" + audio.Remove(0, 3).Insert(3, "_") + ".mp3";
 
             // ce n'est pas un mot
-            if (!(sender as TextBlock).Text.Contains("۞") && !(sender as TextBlock).Text.Contains("۩"))
+            if (!(sender as TextBlock).Text.Contains("۞") && !((sender as TextBlock).Inlines.ElementAt(0) as Run).Text.Contains("۩"))
             {
                 // pause tout les audios actuellement en cours
                 AudioUtilities.PauseAllPlayingAudio();
@@ -185,6 +194,13 @@ namespace House_of_Quran
 
         private async void PlayVerseAudio(object sender, MouseButtonEventArgs e)
         {
+            if (!TogglePlayPauseAudio)
+            {
+                TogglePlayPauseAudio = true;
+                button_playpause.Foreground = Brushes.DarkGreen;
+                LastWasAudio = true;
+            }
+
             LastTextBlockPlayed = WrapPanel_QuranText.Children.IndexOf((sender as TextBlock));
 
             string audio = (sender as TextBlock).Tag.ToString(); // 001001
@@ -269,13 +285,12 @@ namespace House_of_Quran
                 else
                     textBlock_mot.FontSize = Convert.ToInt16(textBlock_textSize.Text);
 
-
                 try
                 {
                     // la size est dans la width du tajweed aussi
                     int i = Utilities.RemoveDiacritics((textBlock_mot.Inlines.ElementAt(0) as Run).Tag.ToString()).Length;
                     ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Width = (i * Convert.ToInt16(textBlock_textSize.Text)) / 2;
-                    ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Height = (100 + (textBlock_textSize.Text.Length > 1 ? (Convert.ToInt16(textBlock_textSize.Text[0])) : 0.5)) / 2;
+                    ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Height = (100 + (textBlock_textSize.Text.Length > 1 ? Convert.ToInt16(textBlock_textSize.Text[0])* 2 : 0.5)) / 2;
                 }
                 catch { }
                 
@@ -302,17 +317,20 @@ namespace House_of_Quran
             {
                 TextBlock textBlock_mot = (TextBlock)WrapPanel_QuranText.Children[i];
 
-                if (!String.IsNullOrEmpty((WrapPanel_QuranText.Children[i + 1] as TextBlock).Text))
+                if (String.IsNullOrEmpty((WrapPanel_QuranText.Children[i + 1] as TextBlock).Text))
                 {
-                    (textBlock_mot.Inlines.ElementAt(0) as Run).Text = textBlock_mot.Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
-                    
-                    if (String.IsNullOrEmpty(textBlock_mot.Text))
+                    try
+                    {
+                        (textBlock_mot.Inlines.ElementAt(0) as Run).Text = textBlock_mot.Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
                         ((textBlock_mot.Inlines.ElementAt(1) as InlineUIContainer).Child as Image).Margin = new Thickness(Convert.ToInt16(textBlock_espacement.Text), 0, Convert.ToInt16(textBlock_espacement.Text), 0);
-
+                    }
+                    catch { }
+                        
                 }
                 else
                 {
-                    textBlock_mot.Text = textBlock_mot.Text.Trim() + new String(' ', 2);
+                    if(!MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value)
+                        textBlock_mot.Text = textBlock_mot.Text.Trim() + new String(' ', 2);
                 }
             }
 
@@ -407,7 +425,7 @@ namespace House_of_Quran
             }
         }
 
-        internal static bool ToogglePlayPauseAudio = false;
+        internal static bool TogglePlayPauseAudio = false;
 
         /// <summary>
         /// Play/Pause audio
@@ -418,9 +436,9 @@ namespace House_of_Quran
         {
             // ToogglePlayPauseAudio == false : pause
             // ToogglePlayPauseAudio == true : play
-            ToogglePlayPauseAudio = !ToogglePlayPauseAudio;
+            TogglePlayPauseAudio = !TogglePlayPauseAudio;
 
-            if (ToogglePlayPauseAudio)
+            if (TogglePlayPauseAudio)
             {
                 LastWasAudio = true;
                 GetNextTextBlockIndexToPlay(1);
@@ -452,10 +470,10 @@ namespace House_of_Quran
 
         private void Button_Left_Click(object sender, RoutedEventArgs e)
         {
-            if (ToogglePlayPauseAudio == false)
+            if (TogglePlayPauseAudio == false)
             {
                 button_playpause.Foreground = Brushes.DarkGreen;
-                ToogglePlayPauseAudio = true;
+                TogglePlayPauseAudio = true;
             }
 
             // Play mot/sourate d'avant
@@ -491,11 +509,18 @@ namespace House_of_Quran
             }
             else if (MainWindow._MainWindow.radioButton_recitation_verse.IsChecked == true)
             {
-                do
+                try
                 {
-                    LastTextBlockPlayed += i;
+                    do
+                    {
+                        LastTextBlockPlayed += i;
 
-                } while (!(WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Text.Contains("﴾") || (WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed);
+                    } while (!(WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Text.Contains("﴾") || (WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed);
+                }
+                catch {
+                    // sourate finit 
+                    LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
+                }
             }
         }
 
@@ -516,16 +541,19 @@ namespace House_of_Quran
         {
             i++;
             if (i == 2)
+            {
+                AudioUtilities.PauseAllPlayingAudio(true);
                 return;
+            }
 
-            if (ToogglePlayPauseAudio == false)
+            if (TogglePlayPauseAudio == false)
             {
                 button_playpause.Foreground = Brushes.DarkGreen;
-                ToogglePlayPauseAudio = true;
+                TogglePlayPauseAudio = true;
             }
 
             // Si on est dans une zone de répétion et qu'un audio vient d'être joué (= on doit laisser un blanc)
-            if (MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value && LastWasAudio)
+            if (MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value && LastWasAudio && (!MainWindow._MainWindow.checkbox_uniquementVerset.IsChecked.Value || AudioUtilities.LastColoredTextBlock.Any(x => !String.IsNullOrEmpty(x.Text))))
             {
                 // La dernière chose joué n'était pas un audio mais une zone de répétion
                 LastWasAudio = false;
@@ -539,7 +567,21 @@ namespace House_of_Quran
                 else
                 {
                     // Timer du temps à faire le blanc
-                    T_Repeter = new System.Timers.Timer(AudioUtilities.LastAudioPlayedDuration);
+                    // on ajoute au temps d'origine le % MainWindow._MainWindow.integerUpDown_tempsRepeter.Value.Value du temps
+                    double temps_a_ajouter = ((double)MainWindow._MainWindow.integerUpDown_tempsRepeter.Value.Value / (double)100) * AudioUtilities.LastAudioPlayedDuration;
+                    double total_repeter_duration = AudioUtilities.LastAudioPlayedDuration + temps_a_ajouter;
+                    T_Repeter = new Timer(total_repeter_duration);
+                    AudioUtilities.LastColoredTextBlock.ForEach(x => { x.Foreground = Brushes.Blue; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? Brushes.LightBlue : Brushes.Transparent; });
+
+                    // Animation répéter
+                    progressBar_repeterAnim1.Maximum = total_repeter_duration;
+                    progressBar_repeterAnim2.Maximum = total_repeter_duration;
+                    Border_Controles.Opacity = 1;
+
+                    TimeSpan duration = TimeSpan.FromMilliseconds(total_repeter_duration);
+                    DoubleAnimation animation = new DoubleAnimation(total_repeter_duration, duration);
+                    progressBar_repeterAnim1.BeginAnimation(ProgressBar.ValueProperty, animation);
+                    progressBar_repeterAnim2.BeginAnimation(ProgressBar.ValueProperty, animation);
 
                     // Fait le blanc et joue l'audio suivant lorsque celui ci est terminé
                     T_Repeter.Elapsed += (sender, e) =>
@@ -548,9 +590,16 @@ namespace House_of_Quran
                         {
                             if (!AudioUtilities.IsAnyAudioPlaying())
                             {
+                                AudioUtilities.LastColoredTextBlock.ForEach(x => { x.Foreground = AudioUtilities.COLOR_AYAH; x.Background = Brushes.Transparent; });
+
                                 T_Repeter.Stop();
                                 Button_Right_Click(this, null);
                             }
+
+                            // value = 0
+                            progressBar_repeterAnim1.BeginAnimation(ProgressBar.ValueProperty, null);
+                            progressBar_repeterAnim2.BeginAnimation(ProgressBar.ValueProperty, null);
+
                         });
 
                     };
@@ -562,13 +611,24 @@ namespace House_of_Quran
             {
                 LastWasAudio = true; // On va jouer un audio          
 
+                if (AudioUtilities.LastAudioPlayedDuration == 0)
+                {
+                    Button_Right_Click(this, null);
+                    return;
+                }
+
                 // Fin de la sourate on s'arrête
-                if (LastTextBlockPlayed == WrapPanel_QuranText.Children.Count - 1)
+                if ((LastTextBlockPlayed == WrapPanel_QuranText.Children.Count - 1 && (MainWindow._MainWindow.radioButton_recitation_wbwandverse.IsChecked.Value ||
+                    MainWindow._MainWindow.radioButton_recitation_verse.IsChecked.Value)) || (LastTextBlockPlayed == WrapPanel_QuranText.Children.Count - 2 && 
+                    MainWindow._MainWindow.radioButton_recitation_wbw.IsChecked.Value))
                 {
                     LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
                     button_playpause.Background = Brushes.Transparent;
                     AudioUtilities.PauseAudio();
-                    ToogglePlayPauseAudio = false;
+                    TogglePlayPauseAudio = false;
+                    button_playpause.Foreground = Brushes.Red;
+                    if(MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value)
+                        Border_AudioControl_MouseLeave(this, null); // pour pas qu'elle soit en opacité 1 vu que progress barre est dedans
                     return;
                 }
 

@@ -9,6 +9,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace House_of_Quran
@@ -170,6 +172,8 @@ namespace House_of_Quran
             return sb.ToString();
         }
 
+
+
         internal static string RemoveDiacritics(string text)
         {
             var normalizedString = text.Normalize(NormalizationForm.FormD);
@@ -203,6 +207,14 @@ namespace House_of_Quran
                     i++;
                 }
             }
+        }
+
+        private static TimeSpan duration = TimeSpan.FromSeconds(0.1);
+
+        internal static void SetPercent(this ProgressBar progressBar, double percentage)
+        {
+            DoubleAnimation animation = new DoubleAnimation(percentage, duration);
+            progressBar.BeginAnimation(ProgressBar.ValueProperty, animation);
         }
     }
 }

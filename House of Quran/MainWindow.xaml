@@ -110,19 +110,40 @@
 
                             <Border Background="#5FFFE8A8" Margin="0,5,0,0">
                                 <StackPanel Margin="0,2,0,0">
-                                    <RadioButton x:Name="radioButton_recitation_wbwandverse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,10,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" IsChecked="True" >
+                                    <RadioButton x:Name="radioButton_recitation_wbwandverse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,10,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="radioButtons_recitation_Checked" >
                                         <TextBlock Text="Mot à mot + verset" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
                                     </RadioButton>
-                                    <RadioButton x:Name="radioButton_recitation_wbw" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" >
+                                    <RadioButton x:Name="radioButton_recitation_wbw" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="radioButtons_recitation_Checked">
                                         <TextBlock Text="Mot à mot" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
                                     </RadioButton>
-                                    <RadioButton x:Name="radioButton_recitation_verse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  >
+                                    <RadioButton x:Name="radioButton_recitation_verse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  Checked="radioButtons_recitation_Checked">
                                         <TextBlock Text="Verset" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
                                     </RadioButton>
-                                    <CheckBox x:Name="checkbox_repeter_lecture" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  >
-                                        <TextBlock Text="Laisser du temps pour répéter" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
+                                    <CheckBox x:Name="checkbox_repeter_lecture" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="checkbox_repeter_lecture_Checked" Unchecked="checkbox_repeter_lecture_Unchecked"  >
+                                        <TextBlock TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0">
+                                            <Run Text="Laisser du temps pour répéter" />
+                                        </TextBlock>
                                     </CheckBox>
-                                    <CheckBox x:Name="checkbox_LectureAutomatique" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  >
+
+                                    <TextBlock  TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="25,-8,2,5">
+                                         <CheckBox x:Name="checkbox_uniquementVerset" RenderTransformOrigin="0.5,0.5" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" IsEnabled="False" >
+                                            <CheckBox.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                                    <SkewTransform/>
+                                                    <RotateTransform/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </CheckBox.RenderTransform>
+                                        </CheckBox><Run Text="(Uniquement pour les versets?)" FontSize="12"/>
+                                        
+                                    </TextBlock>
+                                   
+
+                                        <TextBlock Text="Durée + 𝑥% du temps :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,0,2,0" />
+                                    <xctk:IntegerUpDown IsEnabled="False" x:Name="integerUpDown_tempsRepeter" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsRepeter_ValueChanged"/>
+
+                                    <CheckBox x:Name="checkbox_LectureAutomatique" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Unchecked="checkbox_LectureAutomatique_Unchecked"  >
                                         <TextBlock Text="Lecture automatique" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
                                     </CheckBox>
                                 </StackPanel>

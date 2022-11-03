@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Linq;
 using static System.Net.WebRequestMethods;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace House_of_Quran
 {
@@ -23,6 +24,7 @@ namespace House_of_Quran
     {
         internal static readonly System.Windows.Media.SolidColorBrush COLOR_AYAH_BEING_PLAYED = System.Windows.Media.Brushes.Red;
         internal static readonly System.Windows.Media.SolidColorBrush COLOR_AYAH = System.Windows.Media.Brushes.Black;
+        internal static List<TextBlock> LastColoredTextBlock;
 
         internal static double LastAudioPlayedDuration = 0;
 
@@ -39,7 +41,7 @@ namespace House_of_Quran
                         LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
 
                         if (verseWords != null)
-                            verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
+                            verseWords.ForEach(x => { x.Foreground = COLOR_AYAH;x.Background = Brushes.Transparent; }) ;
 
                         waveOut.Dispose();
                         vorbisStream.Dispose();
@@ -52,14 +54,15 @@ namespace House_of_Quran
                     waveOut.Play();
                     woE = waveOut;
 
+                    LastColoredTextBlock = verseWords;
 
                     if (verseWords != null)
-                        verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
 
                     while (waveOut.PlaybackState == PlaybackState.Playing)
                     {
                         if (verseWords != null)
-                            verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
+                            verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
                         await Task.Delay(10);
                     }
 
@@ -79,7 +82,7 @@ namespace House_of_Quran
                     LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
 
                     if (verseWords != null)
-                        verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
 
                     waveOut.Dispose();
                     vorbisStream.Dispose();
@@ -92,14 +95,15 @@ namespace House_of_Quran
                 waveOut.Play();
                 woE = waveOut;
 
+                LastColoredTextBlock = verseWords;
 
                 if (verseWords != null)
-                    verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
+                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
 
                 while (waveOut.PlaybackState == PlaybackState.Playing)
                 {
                     if (verseWords != null)
-                        verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
                     await Task.Delay(10);
                 }
             }
@@ -133,9 +137,10 @@ namespace House_of_Quran
             waveOut.Init(Mp3Reader);
             waveOut.Play();
             wo = waveOut;
+            LastColoredTextBlock = verseWords;
 
-            if(verseWords != null)
-                verseWords.ForEach(x => {x.Foreground = COLOR_AYAH_BEING_PLAYED; });
+            if (verseWords != null)
+                verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
 
             var t_keepColor = new System.Timers.Timer(10);
 
@@ -147,8 +152,8 @@ namespace House_of_Quran
                       DispatcherPriority.Background,
                       new Action(() => {
                           if(t_keepColor.Enabled)
-                                verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
-                    }));
+                              verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
+                      }));
                 };
                 t_keepColor.Start();
             }
@@ -160,7 +165,7 @@ namespace House_of_Quran
                 t_keepColor.Stop();
 
                 if (verseWords != null)
-                    verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
+                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
 
                 waveOut.Dispose();
 
@@ -184,22 +189,22 @@ namespace House_of_Quran
                     mf.Dispose();
 
                     if (verseWords != null)
-                        verseWords.ForEach(x => x.Foreground = COLOR_AYAH);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
 
                     PlayNextAudioIfNeeded();
                 };
 
                 wo.Init(mf);
                 wo.Play();
-
+                LastColoredTextBlock = verseWords;
 
                 if (verseWords != null)
-                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; });
+                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
 
                 while (wo.PlaybackState == PlaybackState.Playing)
                 {
                     if (verseWords != null)
-                        verseWords.ForEach(x => x.Foreground = COLOR_AYAH_BEING_PLAYED);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = MainWindow._MainWindow.checkBox_tajweed.IsChecked.Value ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
                     await Task.Delay(10);
                 }
             }
@@ -207,10 +212,11 @@ namespace House_of_Quran
 
         private static void PlayNextAudioIfNeeded()
         {
-            if (((MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && UserControl_QuranReader.ToogglePlayPauseAudio && MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value))
-            || (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && (UserControl_QuranReader.ToogglePlayPauseAudio)))
+            if (((MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && UserControl_QuranReader.TogglePlayPauseAudio && MainWindow._MainWindow.checkbox_repeter_lecture.IsChecked.Value))
+            || (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && (UserControl_QuranReader.TogglePlayPauseAudio)))
             {
-                UserControl_QuranReader.PlayNext(null, null);
+                if(!IsAnyAudioPlaying() )
+                    UserControl_QuranReader.PlayNext(null, null);
             }
             else
             {
@@ -218,7 +224,7 @@ namespace House_of_Quran
             }
 
             // pas de lecture automatique est audio finit = pause
-            if(!MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked.Value && UserControl_QuranReader. ToogglePlayPauseAudio && !IsAnyAudioPlaying())
+            if(!MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked.Value && UserControl_QuranReader. TogglePlayPauseAudio && !IsAnyAudioPlaying())
             {
                 UserControl_QuranReader.PlayPause(null, null);
             }
@@ -229,9 +235,16 @@ namespace House_of_Quran
         /// <summary>
         /// Pause tout les audios actuellement en cours
         /// </summary>
-        internal static void PauseAllPlayingAudio()
+        internal static void PauseAllPlayingAudio(bool? force = null)
         {
             ForcedStop =!MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked.Value;
+            if (force != null)
+                ForcedStop = force.Value;
+
+            woE.Dispose();
+            wo.Dispose();
+            wao.Dispose();
+
             woE.Stop();
             wo.Stop();
             wao.Stop();

@@ -48,9 +48,22 @@ namespace House_of_Quran
 
             InitializeComponent();
 
-            checkBox_tajweed.Checked -= checkBox_tajweed_Checked;
-            checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
-            checkBox_tajweed.Checked += checkBox_tajweed_Checked;
+            checkbox_repeter_lecture.IsChecked = Properties.Settings.Default.RepeterLecture;
+            checkbox_LectureAutomatique.IsChecked = Properties.Settings.Default.LectureAutomatique;
+            integerUpDown_tempsRepeter.Value = (int)Properties.Settings.Default.TempsRepeter;
+
+            switch (Properties.Settings.Default.ChoixRecitation)
+            {
+                case 1:
+                    radioButton_recitation_wbwandverse.IsChecked = true;
+                    break;
+                case 2:
+                    radioButton_recitation_wbw.IsChecked = true;
+                    break;
+                case 3:
+                    radioButton_recitation_verse.IsChecked = true;
+                    break;
+            }
 
             _MainWindow = this;
 
@@ -71,6 +84,9 @@ namespace House_of_Quran
 
             T_InternetCheck.Elapsed += new ElapsedEventHandler(InternetCheck);
             T_InternetCheck.Start();
+
+            checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
+            checkbox_uniquementVerset.IsChecked = Properties.Settings.Default.UniquementPourVerset;
         }
 
         private void InternetCheck(object? sender, ElapsedEventArgs e)
@@ -525,12 +541,103 @@ namespace House_of_Quran
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Applique le tajweed ou le désactive
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkBox_tajweed_Checked(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.Tajweed = checkBox_tajweed.IsChecked.Value;
             Properties.Settings.Default.Save();
 
             userControl_QuranReader.ApplyTajweed(checkBox_tajweed.IsChecked.Value);
+        }
+
+        /// <summary>
+        /// Si on utilise la fonction répéter on play obligatoirement en automatique
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void checkbox_repeter_lecture_Checked(object sender, RoutedEventArgs e)
+        {
+            checkbox_LectureAutomatique.IsChecked = true;
+            checkbox_LectureAutomatique.IsEnabled = false;
+            checkbox_uniquementVerset.IsEnabled = true;
+
+            integerUpDown_tempsRepeter.IsEnabled = true;
+
+            Properties.Settings.Default.LectureAutomatique = true;
+            Properties.Settings.Default.RepeterLecture = true;
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Enlève le forçage de la lecture automatique si on est avec le répéter 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void checkbox_repeter_lecture_Unchecked(object sender, RoutedEventArgs e)
+        {
+            checkbox_LectureAutomatique.IsEnabled = true;
+            checkbox_uniquementVerset.IsEnabled = false;
+            integerUpDown_tempsRepeter.IsEnabled = false;
+            Properties.Settings.Default.LectureAutomatique = true;
+            Properties.Settings.Default.RepeterLecture = false;
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
+        private void radioButtons_recitation_Checked(object sender, RoutedEventArgs e)
+        {
+            if((sender as RadioButton) == radioButton_recitation_wbwandverse)        
+                Properties.Settings.Default.ChoixRecitation = 1;
+            else if ((sender as RadioButton) == radioButton_recitation_wbw)
+                Properties.Settings.Default.ChoixRecitation = 2;
+            else
+                Properties.Settings.Default.ChoixRecitation = 3;
+
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
+        private void integerUpDown_tempsRepeter_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            try
+            {
+                Properties.Settings.Default.TempsRepeter = (byte)integerUpDown_tempsRepeter.Value.Value;
+            }
+            catch
+            {
+                Properties.Settings.Default.TempsRepeter = 0;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
+        private void checkbox_LectureAutomatique_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.LectureAutomatique =false;
+            Properties.Settings.Default.Save();
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.UniquementPourVerset = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.UniquementPourVerset = false;
+            Properties.Settings.Default.Save();
         }
     }
 }

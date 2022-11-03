@@ -128,5 +128,65 @@ namespace House_of_Quran.Properties {
                 this["Tajweed"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LectureAutomatique {
+            get {
+                return ((bool)(this["LectureAutomatique"]));
+            }
+            set {
+                this["LectureAutomatique"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RepeterLecture {
+            get {
+                return ((bool)(this["RepeterLecture"]));
+            }
+            set {
+                this["RepeterLecture"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public byte ChoixRecitation {
+            get {
+                return ((byte)(this["ChoixRecitation"]));
+            }
+            set {
+                this["ChoixRecitation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public byte TempsRepeter {
+            get {
+                return ((byte)(this["TempsRepeter"]));
+            }
+            set {
+                this["TempsRepeter"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UniquementPourVerset {
+            get {
+                return ((bool)(this["UniquementPourVerset"]));
+            }
+            set {
+                this["UniquementPourVerset"] = value;
+            }
+        }
     }
 }
