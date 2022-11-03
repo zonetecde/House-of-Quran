@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -32,6 +33,8 @@ namespace House_of_Quran
         internal List<Recitateur> Recitateurs;
         internal static FontFamily CurrentFont;
         internal static MainWindow _MainWindow;
+        private Timer T_InternetCheck = new Timer(1000);
+        internal static bool HaveInternet = true;
 
         public MainWindow()
         {
@@ -62,7 +65,50 @@ namespace House_of_Quran
 
             WcDownloader.DownloadFileCompleted += DownloadFileCompleted;
 
+            T_InternetCheck.Elapsed += new ElapsedEventHandler(InternetCheck);
+            T_InternetCheck.Start();
         }
+
+        private void InternetCheck(object? sender, ElapsedEventArgs e)
+        {
+            if (Utilities.CheckForInternetConnection())
+            {
+                if(!HaveInternet)
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        HaveInternet = true;
+
+                        // on change tout ce qu'il y a d'accessible qu'avec la wifi
+                        ColorEffectOnDownloadedRecitator((int)userControl_QuranReader.Tag);
+                        ColorEffectOnDownloadedSourate();
+                        ContinueDownloading();
+                        checkBox_HorsLigne.IsEnabled = true;
+                    });
+
+                }
+                else
+                    HaveInternet = true;
+            }
+            else
+            {
+                if(HaveInternet)
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        HaveInternet = false;
+
+                        // on change tout ce qu'il y a d'accessible qu'avec la wifi
+                        ColorEffectOnDownloadedRecitator((int)userControl_QuranReader.Tag);
+                        ColorEffectOnDownloadedSourate();
+                        checkBox_HorsLigne.IsEnabled = false;
+                    });
+                }
+                else
+                    HaveInternet = false;
+            }
+        }
+
 
         private void InitFont()
         {
@@ -93,7 +139,7 @@ namespace House_of_Quran
             Recitateurs = JsonConvert.DeserializeObject<List<Recitateur>>(File.ReadAllText(@"data\recitateur.json"));
             foreach (var recitateur in Recitateurs)
             {
-                comboBox_Recitateur.Items.Add(new ComboBoxItem() { Content = recitateur.Nom + (String.IsNullOrEmpty(recitateur.Type) ? String.Empty : " (" + recitateur.Type + ")") });
+                comboBox_Recitateur.Items.Add(new ComboBoxItem() { Content = recitateur.Nom });
             }
             comboBox_Recitateur.SelectedIndex = Properties.Settings.Default.DernierRecitateur; // Alafasy par défaut
         }
@@ -122,7 +168,7 @@ namespace House_of_Quran
                 string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex];
 
                 if(!WcDownloader.IsBusy)
-                    DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(37, 3)));
+                    DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)));
             }
         }
 
@@ -142,15 +188,16 @@ namespace House_of_Quran
 
         private void ContinueDownloading()
         {
-            if (Properties.Settings.Default.DownloadList.Count > 0)
-            {
-                string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex];
-                string lien2 = lien.Substring(0, lien.LastIndexOf('/') + 1);
-                progressBar_downloader.Maximum = Properties.Settings.Default.DownloadList.Count;
-                progressBar_downloader.Value = Properties.Settings.Default.CurrentDownloadIndex;
-
-                DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien2), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(37, 3)));
-            }
+            if(HaveInternet)
+                if (Properties.Settings.Default.DownloadList.Count > 0)
+                {
+                    string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex];
+                    string lien2 = lien.Substring(0, lien.LastIndexOf('/') + 1);
+                    progressBar_downloader.Maximum = Properties.Settings.Default.DownloadList.Count;
+                    progressBar_downloader.Value = Properties.Settings.Default.CurrentDownloadIndex;
+                    
+                    DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)));
+                }
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -234,18 +281,22 @@ namespace House_of_Quran
         /// </summary>
         private void DownloadAll(int recitateur, int sourateIndex)
         {
-            string folderPath = string.Empty;
-            if(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Contains("wbw"))
-                folderPath = @"data\quran\" + Quran[sourateIndex].EnglishName + @"\wbw\" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(35, 7) + ".mp3";
-            else
-                folderPath = @"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + recitateur + "-" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
+            if (HaveInternet)
+            {
+                string folderPath = string.Empty;
 
-            if(!WcDownloader.IsBusy)
-                WcDownloader.DownloadFileAsync(new Uri(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]),
+                if (Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Contains("wbw"))
+                    folderPath = @"data\quran\" + Quran[sourateIndex - 1].EnglishName + @"\wbw\" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(35, 7) + ".mp3";
+                else
+                    folderPath = @"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + recitateur + "-" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
 
-                    // Set le path de téléchargement du fichier
-                    folderPath
-                    , comboBox_Recitateur.SelectedIndex);
+                if (!WcDownloader.IsBusy)
+                    WcDownloader.DownloadFileAsync(new Uri(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]),
+
+                        // Set le path de téléchargement du fichier
+                        folderPath
+                        , comboBox_Recitateur.SelectedIndex);
+            }
         }
 
         /// <summary>
@@ -255,7 +306,7 @@ namespace House_of_Quran
         /// <param name="e"></param>
         private void checkBox_HorsLigne_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Êtes-vous sûre de vouloir supprimer la récitation de " + Recitateurs[comboBox_Recitateur.SelectedIndex].Nom + " " + Recitateurs[comboBox_Recitateur.SelectedIndex].Type + " de sourate " + Quran[(int)userControl_QuranReader.Tag].EnglishName + " des téléchargements ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Êtes-vous sûre de vouloir supprimer la récitation de " + Recitateurs[comboBox_Recitateur.SelectedIndex].Nom + " de sourate " + Quran[(int)userControl_QuranReader.Tag].EnglishName + " des téléchargements ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 // Il n'y a qu'un récitateur de télécharger pour cette sourate, on peut donc tout supprimer
                 try
@@ -268,6 +319,7 @@ namespace House_of_Quran
                         string rootFolderPath = @"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse";
                         string filesToDelete = comboBox_Recitateur.SelectedIndex + "-"; // Va supprimer les fichiers contenant le récitateur là uniquement
                         string[] fileList = Directory.GetFiles(rootFolderPath).ToList().FindAll(x => x.Contains(filesToDelete)).ToArray();
+                        fileList = fileList.Reverse().ToArray();
                         foreach (string file in fileList)
                             File.Delete(file);
                     }
@@ -275,6 +327,8 @@ namespace House_of_Quran
                 catch
                 {
                     MessageBox.Show("Veuillez attendre la fin du téléchargement pour pouvoir la supprimer.", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    checkBox_HorsLigne.IsChecked = true;
                     return;
                 }
 
@@ -357,11 +411,17 @@ namespace House_of_Quran
                     // Effet couleur car téléchargé
                     item.Foreground = Brushes.DarkGreen;
                     item.Background = Brushes.Bisque;
+                    item.IsEnabled = true;
                 }
                 else
                 {
                     item.Background = Brushes.Transparent;
                     item.Foreground = Brushes.Black;
+
+                    if (!HaveInternet)
+                        item.IsEnabled = false;
+                    else
+                        item.IsEnabled = true;
                 }
 
             }
@@ -377,11 +437,18 @@ namespace House_of_Quran
                     // Effet couleur car téléchargé
                     item.Foreground = Brushes.DarkGreen;
                     item.Background = Brushes.Bisque;
+
+                    item.IsEnabled = true;
                 }
                 else
                 {
                     item.Background = Brushes.Transparent;
                     item.Foreground = Brushes.Black;
+
+                    if (!HaveInternet)
+                        item.IsEnabled = false;
+                    else
+                        item.IsEnabled = true;
                 }
             }
         }

@@ -37,7 +37,7 @@ namespace House_of_Quran.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("13")]
         public int DernierRecitateur {
             get {
                 return ((int)(this["DernierRecitateur"]));

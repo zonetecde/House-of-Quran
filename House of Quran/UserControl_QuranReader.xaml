@@ -6,7 +6,7 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:House_of_Quran"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800" PreviewKeyDown="UserControl_KeyDown">
     <UserControl.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
@@ -72,8 +72,13 @@
 
         <Border Background="White" Grid.Row="1" CornerRadius="20,20,0,0">
             <Grid>
+               
                 <ScrollViewer Margin="15,15,15,15" >
-                    <local:AlignableWrapPanel HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
+                    <Grid>
+                        <local:AlignableWrapPanel HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
+                        <Line Height="200"/>
+                    </Grid>
+                    
                 </ScrollViewer>
 
                 <Grid>
@@ -98,7 +103,7 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button  Grid.Column="0" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White">
+                                <Button  Grid.Column="0" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White" Click="Button_Left_Click">
                                     <Viewbox>
                                         <TextBlock Cursor="Hand">
                                             ⏮
@@ -106,14 +111,14 @@
                                     </Viewbox>
                                 </Button> 
                                 
-                                <Button  Grid.Column="1" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White">
+                                <Button  Grid.Column="1" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White" Click="Button_PlayPause_Click">
                                     <Viewbox>
                                         <TextBlock Cursor="Hand">
                                             ⏯️
                                         </TextBlock>
                                     </Viewbox>
                                 </Button>
-                                <Button  Grid.Column="2" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White">
+                                <Button  Grid.Column="2" Style="{DynamicResource ButtonStyle_MouseHover}" Background="#00DDDDDD" BorderBrush="#00707070" Foreground="White" Click="Button_Right_Click">
                                     <Viewbox>
                                         <TextBlock Cursor="Hand">
                                             ⏭

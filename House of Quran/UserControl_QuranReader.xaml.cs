@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static System.Windows.Forms.AxHost;
+using MessageBox = Xceed.Wpf.Toolkit.MessageBox;
 
 namespace House_of_Quran
 {
@@ -26,12 +27,17 @@ namespace House_of_Quran
     /// </summary>
     public partial class UserControl_QuranReader : UserControl
     {
+        private int LastTextBlockPlayed = -1;
+        internal static Action<object, RoutedEventArgs> PlayNext;
+
         public UserControl_QuranReader()
         {
             InitializeComponent();
 
             textBlock_textSize.Text = Properties.Settings.Default.DerniereTaille.ToString();
             textBlock_espacement.Text = Properties.Settings.Default.DernierEspacement.ToString();
+
+            PlayNext = Button_Right_Click;
         }
 
         public void AfficherSourate(int id)
@@ -101,13 +107,14 @@ namespace House_of_Quran
 
         private  async void PlayWordAudio(object sender, MouseButtonEventArgs e)
         {
+            LastTextBlockPlayed = WrapPanel_QuranText.Children.IndexOf((sender as TextBlock));
+
             string audio = (sender as TextBlock).Tag.ToString(); // 001001001
             string file = @"data\quran\" + MainWindow.Quran[(int)this.Tag].EnglishName + @"\wbw\" + audio.Remove(0, 3).Insert(3, "_") + ".mp3";
 
             // ce n'est pas un mot
             if (!(sender as TextBlock).Text.Contains("۞") && !(sender as TextBlock).Text.Contains("۩"))
             {
-
                 // pause tout les audios actuellement en cours
                 AudioUtilities.PauseAllPlayingAudio();
 
@@ -119,9 +126,16 @@ namespace House_of_Quran
                 }
                 else
                 {
-                    // Play depuis un lien
-                    var url = "https://audio.qurancdn.com/wbw/" + audio.Insert(3, "_").Insert(7, "_") + ".mp3";
-                    await AudioUtilities.PlayAudioFromUrl(url, new List<TextBlock> { (sender as TextBlock) });
+                    if (MainWindow.HaveInternet)
+                    {
+                        // Play depuis un lien
+                        var url = "https://audio.qurancdn.com/wbw/" + audio.Insert(3, "_").Insert(7, "_") + ".mp3";
+                        await AudioUtilities.PlayAudioFromUrl(url, new List<TextBlock> { (sender as TextBlock) });
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aucune connexion internet, pensez à télécharger ou à finir le téléchargement de cette sourate avec ce récitateur.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
                 }
             }
 
@@ -129,6 +143,8 @@ namespace House_of_Quran
 
         private async void PlayVerseAudio(object sender, MouseButtonEventArgs e)
         {
+            LastTextBlockPlayed = WrapPanel_QuranText.Children.IndexOf((sender as TextBlock));
+
             string audio = (sender as TextBlock).Tag.ToString(); // 001001
             int recitateurIndex = MainWindow._MainWindow.comboBox_Recitateur.SelectedIndex;
             string extensionRecitateur = MainWindow._MainWindow.Recitateurs[recitateurIndex].Extension; // .ogg ou .mp3
@@ -139,10 +155,13 @@ namespace House_of_Quran
 
             // Récupère tous les TextBlock du verset en question
             List<TextBlock> verseWords = new List<TextBlock>();
-            for (int i = WrapPanel_QuranText.Children.IndexOf(sender as TextBlock) - 1; i >= 0; i--)
+            for (int i = WrapPanel_QuranText.Children.IndexOf(sender as TextBlock); i >= 0; i--)
             {
-                if ((WrapPanel_QuranText.Children[i] as TextBlock).Text.Contains("﴾"))
+                // la deuxieme condition est là sinon ça s'arrête à la première textBlock qui est un chiffre, celui du verset à jouer
+                if ((WrapPanel_QuranText.Children[i] as TextBlock).Text.Contains("﴾") && i != WrapPanel_QuranText.Children.IndexOf(sender as TextBlock)) 
+                {
                     break;
+                }
 
                 verseWords.Add(WrapPanel_QuranText.Children[i] as TextBlock);
             }
@@ -160,10 +179,15 @@ namespace House_of_Quran
             }
             else
             {
-                // Play depuis internet
-                string lien = MainWindow._MainWindow.Recitateurs[recitateurIndex].Lien + audio + extensionRecitateur;
+                if (MainWindow.HaveInternet)
+                {
+                    // Play depuis internet
+                    string lien = MainWindow._MainWindow.Recitateurs[recitateurIndex].Lien + audio + extensionRecitateur;
 
-                await AudioUtilities.PlayOggFileFromUrl(lien, verseWords);
+                    await AudioUtilities.PlayAudioFromUrl(lien, verseWords);
+                }
+                else
+                    MessageBox.Show("Aucune connexion internet, pensez à télécharger cette sourate avec ce récitateur.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 
@@ -315,6 +339,111 @@ namespace House_of_Quran
                 else
                     txtBlock.Visibility = Visibility.Visible;
             }
+        }
+
+        internal static bool ToogglePlayPauseAudio = true;
+
+        /// <summary>
+        /// Play/Pause audio
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_PlayPause_Click(object sender, RoutedEventArgs e)
+        {
+            // ToogglePlayPauseAudio == false : pause
+            // ToogglePlayPauseAudio == true : play
+            if (ToogglePlayPauseAudio)
+            {
+                GetNextTextBlockIndexToPlay(1);
+
+                PlayCurrentIndex();
+            }
+            else
+                AudioUtilities.PauseAudio();
+
+            ToogglePlayPauseAudio = !ToogglePlayPauseAudio;
+        }
+
+        private void UserControl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+                Button_PlayPause_Click(this, null);
+            }
+            if (e.Key == Key.Left)
+                Button_Left_Click(this, null);
+            if (e.Key == Key.Right)
+                Button_Right_Click(this, null);
+        }
+
+        private void Button_Left_Click(object sender, RoutedEventArgs e)
+        {
+            // Play mot/sourate d'avant
+            ToogglePlayPauseAudio = false;
+            int p = LastTextBlockPlayed;
+            try
+            {
+                GetNextTextBlockIndexToPlay(-1);
+            }
+            catch { LastTextBlockPlayed = p; if((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed) GetNextTextBlockIndexToPlay(1); }
+
+            if (LastTextBlockPlayed < 0)
+                LastTextBlockPlayed = 0;
+
+            PlayCurrentIndex();
+        }
+
+        private void GetNextTextBlockIndexToPlay(int i)
+        {
+            if (MainWindow._MainWindow.radioButton_recitation_wbwandverse.IsChecked == true)
+                do
+                {
+                    LastTextBlockPlayed += i;
+
+                } while ((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed);
+
+            else if (MainWindow._MainWindow.radioButton_recitation_wbw.IsChecked == true)
+            {
+                do
+                {
+                    LastTextBlockPlayed += i;
+
+                } while ((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Text.Contains("﴾") || (WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed);
+            }
+            else if (MainWindow._MainWindow.radioButton_recitation_verse.IsChecked == true)
+            {
+                do
+                {
+                    LastTextBlockPlayed += i;
+
+                } while (!(WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Text.Contains("﴾") || (WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Visibility == Visibility.Collapsed);
+            }
+        }
+
+        private void PlayCurrentIndex()
+        {
+            if ((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock).Text.Contains("﴾"))
+                PlayVerseAudio((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock), null);
+            else
+                PlayWordAudio((WrapPanel_QuranText.Children[LastTextBlockPlayed] as TextBlock), null);
+        }
+
+        internal void Button_Right_Click(object sender, RoutedEventArgs e)
+        {
+            ToogglePlayPauseAudio = false;
+
+            int p = LastTextBlockPlayed;
+            try
+            {
+                GetNextTextBlockIndexToPlay(1);
+            }
+            catch { LastTextBlockPlayed = p; }
+
+            if (LastTextBlockPlayed >= WrapPanel_QuranText.Children.Count)
+                LastTextBlockPlayed = WrapPanel_QuranText.Children.Count - 1;
+
+            PlayCurrentIndex();
         }
     }
 }

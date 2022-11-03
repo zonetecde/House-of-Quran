@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -28,9 +29,58 @@ namespace House_of_Quran
                 .Replace('9', '٩');
         }
 
+        internal static bool CheckForInternetConnection(int timeoutMs = 4500, string url = null)
+        {
+            try
+            {
+                url ??= CultureInfo.InstalledUICulture switch
+                {
+                    { Name: var n } when n.StartsWith("fa") => // Iran
+                        "http://www.aparat.com",
+                    { Name: var n } when n.StartsWith("zh") => // China
+                        "http://www.baidu.com",
+                    _ =>
+                        "http://www.gstatic.com/generate_204",
+                };
+
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.KeepAlive = false;
+                request.Timeout = timeoutMs;
+                using (var response = (HttpWebResponse)request.GetResponse())
+                    return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
         internal static void RecitateurToJson()
         {
             List<Recitateur> recitateurs = new List<Recitateur>();
+            List<string> lines = File.ReadAllLines(@"data\dev\recitateurbrute.txt").ToList();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (lines[i].Contains("subfolder"))
+                {
+                    string nom = lines[i + 1].Trim().Substring(8, lines[i + 1].Trim().Length - 10).Replace(" \"", string.Empty);;
+
+                    if(nom.Contains("(Warsh) "))
+                    {
+                        nom = nom.Replace("(Warsh) ", string.Empty);
+                        nom += " (Warsh)";
+                    }
+
+                    string nom2 = lines[i + 2].Trim().Substring(11, lines[i + 2].Trim().Length - 11);
+                    string nom3 = lines[i].Trim().Substring(13, lines[i].Trim().Length - 15);
+                    recitateurs.Add(new Recitateur(nom.Replace("_", " "), nom2, "https://everyayah.com/data/" + nom3 + "/", ".mp3"));
+
+                }
+            }
+
+            recitateurs = recitateurs.OrderBy(x => x.Nom).ToList();
+
             //recitateurs.Add(new Recitateur("AbdulBaset", "Mujawwad", "https://verses.quran.com/AbdulBaset/Mujawwad/ogg/", ".ogg"));
             //recitateurs.Add(new Recitateur("AbdulBaset", "Murattal", "https://verses.quran.com/AbdulBaset/Murattal/ogg/", ".ogg"));
             //recitateurs.Add(new Recitateur("Husary", "Mujawwad", "https://verses.quran.com/Husary/Mujawwad/ogg/", ".ogg"));
@@ -44,6 +94,9 @@ namespace House_of_Quran
             //recitateurs.Add(new Recitateur("Shuraym", string.Empty, "https://verses.quran.com/Shuraym/ogg/", ".ogg"));
             //recitateurs.Add(new Recitateur("Sudais", string.Empty, "https://verses.quran.com/Sudais/ogg/", ".ogg"));
             //recitateurs.Add(new Recitateur("Tunaiji", string.Empty, "https://verses.quran.com/Tunaiji/mp3/", ".mp3"));
+
+
+
             File.WriteAllText(@"data\recitateur.json", JsonConvert.SerializeObject(recitateurs, Formatting.Indented));
         }
 

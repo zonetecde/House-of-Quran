@@ -6,7 +6,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="DernierRecitateur" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">13</Value>
     </Setting>
     <Setting Name="DernierePolice" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5</Value>

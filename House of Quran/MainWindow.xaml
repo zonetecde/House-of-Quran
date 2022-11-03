@@ -96,6 +96,28 @@
                             <ComboBoxItem Content="ScheherazadeRegOT"/>
                             <ComboBoxItem Content="QuranTaha"/>
                         </ComboBox>
+
+                        <Line Height="25"/>
+                        <Label Content="Lecture" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
+
+                        <Border Background="#5FFFE8A8" Margin="0,5,0,0">
+                            <StackPanel>
+                                <RadioButton x:Name="radioButton_recitation_wbwandverse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,10,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" IsChecked="True" >
+                                    <TextBlock Text="Mot à mot + verset" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
+                                </RadioButton>
+                                <RadioButton x:Name="radioButton_recitation_wbw" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" >
+                                    <TextBlock Text="Mot à mot" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
+                                </RadioButton>
+                                <RadioButton x:Name="radioButton_recitation_verse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  >
+                                    <TextBlock Text="Verset" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
+                                </RadioButton> 
+                                <CheckBox x:Name="checkbox_LectureAutomatique" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5"  >
+                                    <TextBlock Text="Lecture automatique" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
+                                </CheckBox>
+                            </StackPanel>
+
+                        </Border>
+                  
                     </StackPanel>
                 </Border>
             </Grid>
