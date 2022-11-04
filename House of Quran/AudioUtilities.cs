@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -36,24 +37,25 @@ namespace House_of_Quran
                 using (var vorbisStream = new NAudio.Vorbis.VorbisWaveReader(stream))
                 using (var waveOut = new NAudio.Wave.WaveOutEvent())
                 {
+                    LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
+
                     waveOut.PlaybackStopped += (sender, e) =>
                     {
-                        LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
-
                         if (verseWords != null)
                             verseWords.ForEach(x => { x.Foreground = COLOR_AYAH;x.Background = Brushes.Transparent; }) ;
 
                         waveOut.Dispose();
                         vorbisStream.Dispose();
 
-                        PlayNextAudioIfNeeded();
-
+                        if (MainWindow._MainWindow.radioButton_modeLecture.IsChecked.Value)
+                            PlayNextAudioIfNeeded();
+                        else if (UserControl_QuranReader.TogglePlayPauseAudio)
+                            PlayNextMemorisationStep();
                     };
 
                     waveOut.Init(vorbisStream);
                     waveOut.Play();
-                    woE = waveOut;
-
+                    _waveOut = waveOut;
                     LastColoredTextBlock = verseWords;
 
                     if (verseWords != null)
@@ -71,15 +73,15 @@ namespace House_of_Quran
             }
         }
 
-
         internal static async Task PlayOggFromLocalFile(string file, List<TextBlock> verseWords)
         {
             using (var vorbisStream = new NAudio.Vorbis.VorbisWaveReader(file))
             using (var waveOut = new NAudio.Wave.WaveOutEvent())
             {
+                LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
+
                 waveOut.PlaybackStopped += (sender, e) =>
                 {
-                    LastAudioPlayedDuration = vorbisStream.TotalTime.TotalMilliseconds;
 
                     if (verseWords != null)
                         verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
@@ -87,13 +89,15 @@ namespace House_of_Quran
                     waveOut.Dispose();
                     vorbisStream.Dispose();
 
-                    PlayNextAudioIfNeeded();
-
+                    if (MainWindow._MainWindow.radioButton_modeLecture.IsChecked.Value)
+                        PlayNextAudioIfNeeded();
+                    else if (UserControl_QuranReader.TogglePlayPauseAudio)
+                        PlayNextMemorisationStep();
                 };
 
                 waveOut.Init(vorbisStream);
                 waveOut.Play();
-                woE = waveOut;
+                _waveOut = waveOut;
 
                 LastColoredTextBlock = verseWords;
 
@@ -109,34 +113,31 @@ namespace House_of_Quran
             }
         }
 
-        private static WaveOutEvent woE = new WaveOutEvent();
-        private static WaveOut wo = new WaveOut();
-        private static WasapiOut wao = new WasapiOut();
+        private static IWavePlayer _waveOut;
+
 
         private static bool PauseEvent = true;
 
         internal static void PauseAudio()
         {
-            woE.Pause();
-            wo.Pause();
-            wao.Pause();
+            _waveOut.Pause();
             ForcedStop = true;
         }
 
         internal static void PlayAudio()
         {
-            try { woE.Play();  } catch { }
-            try { wo.Play();  } catch { }
-            try { wao.Play();  } catch { }         
+            try { _waveOut.Play();  } catch { } 
         }
 
-        internal static async void PlayMp3FromLocalFile(string file, List<TextBlock> verseWords = null)
+        internal static async void PlayMp3FromLocalFile(string file, List<TextBlock> verseWords = null, List<string> files = null)
         {
+            int currentFileIndex = 0;
+
             Mp3FileReader Mp3Reader = new Mp3FileReader(file);
             var waveOut = new WaveOut();
             waveOut.Init(Mp3Reader);
             waveOut.Play();
-            wo = waveOut;
+            _waveOut = waveOut;
             LastColoredTextBlock = verseWords;
 
             if (verseWords != null)
@@ -146,6 +147,7 @@ namespace House_of_Quran
 
             if (verseWords != null)
             {
+                // anim : keep color
                 t_keepColor.Elapsed += (sender, e) =>
                 {
                     Application.Current.Dispatcher.BeginInvoke(
@@ -157,41 +159,99 @@ namespace House_of_Quran
                 };
                 t_keepColor.Start();
             }
+            LastAudioPlayedDuration = Mp3Reader.TotalTime.TotalMilliseconds;
 
             waveOut.PlaybackStopped += (sender, e) =>
             {
-                LastAudioPlayedDuration = Mp3Reader.TotalTime.TotalMilliseconds;
-
-                t_keepColor.Stop();
-
-                if (verseWords != null)
-                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
-
-                waveOut.Dispose();
-
-                PlayNextAudioIfNeeded();
-
-            };
-        }
-
-        internal static async Task PlayAudioFromUrl(string url, List<TextBlock> verseWords)
-        {
-            using (var mf = new MediaFoundationReader(url))
-            using (var wo = new WasapiOut())
-            {
-                wao = wo;
-                wo.PlaybackStopped += (sender, e) =>
+                if (files != null)
                 {
-                    
-                    LastAudioPlayedDuration = mf.TotalTime.TotalMilliseconds; 
+                    // joue le deuxieme audio
+                    currentFileIndex++;
+                    Mp3Reader = new Mp3FileReader(files[currentFileIndex]);
+                    waveOut = new WaveOut();
+                    waveOut.Init(Mp3Reader);
+                    waveOut.Play();
+                    _waveOut = waveOut;
+                    LastAudioPlayedDuration += Mp3Reader.TotalTime.TotalMilliseconds;
 
-                    wo.Dispose();
-                    mf.Dispose();
+                    waveOut.PlaybackStopped += (sender, e) =>
+                    {
+                        t_keepColor.Stop();
+
+                        if (verseWords != null)
+                            verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
+
+                        waveOut.Dispose();
+
+
+                        PlayNextMemorisationStep();
+                    };
+                }
+                else
+                {
+                    t_keepColor.Stop();
 
                     if (verseWords != null)
                         verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
 
-                    PlayNextAudioIfNeeded();
+                    waveOut.Dispose();
+
+                    if (MainWindow._MainWindow.radioButton_modeLecture.IsChecked.Value)
+                        PlayNextAudioIfNeeded();
+                    else if (UserControl_QuranReader.TogglePlayPauseAudio)
+                        PlayNextMemorisationStep();
+                }
+            };
+        }
+
+        internal static async Task PlayAudioFromUrl(string url, List<TextBlock> verseWords, List<string> urls = null)
+        {
+            int currentFileIndex = 0;
+
+            var mf = new MediaFoundationReader(url);
+            var wo = new WasapiOut();
+            {
+                _waveOut = wo;
+                LastAudioPlayedDuration = mf.TotalTime.TotalMilliseconds;
+
+                wo.PlaybackStopped += (sender, e) =>
+                {
+                    if (urls != null)
+                    {
+                        // joue le deuxieme audio
+                        currentFileIndex++;
+                        mf = new MediaFoundationReader(urls[currentFileIndex]);
+                        wo = new WasapiOut();
+                        {
+                            wo.Init(mf);
+                            wo.Play();
+
+                            LastAudioPlayedDuration += mf.TotalTime.TotalMilliseconds;
+
+                            wo.PlaybackStopped += (sender, e) =>
+                            {
+                                if (verseWords != null)
+                                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
+
+                                PlayNextMemorisationStep();
+                            };
+                        }
+
+                    }
+                    else
+                    {
+
+                        wo.Dispose();
+                        mf.Dispose();
+
+                        if (verseWords != null)
+                            verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
+
+                        if (MainWindow._MainWindow.radioButton_modeLecture.IsChecked.Value)
+                            PlayNextAudioIfNeeded();
+                        else if(UserControl_QuranReader.TogglePlayPauseAudio)
+                            PlayNextMemorisationStep();
+                    }
                 };
 
                 wo.Init(mf);
@@ -216,7 +276,7 @@ namespace House_of_Quran
             || (MainWindow._MainWindow.checkbox_LectureAutomatique.IsChecked == true && !ForcedStop && (UserControl_QuranReader.TogglePlayPauseAudio)))
             {
                 if(!IsAnyAudioPlaying() )
-                    UserControl_QuranReader.PlayNext(null, null);
+                    UserControl_QuranReader.PlayNextLectureStep(null, null);
             }
             else
             {
@@ -241,18 +301,23 @@ namespace House_of_Quran
             if (force != null)
                 ForcedStop = force.Value;
 
-            woE.Dispose();
-            wo.Dispose();
-            wao.Dispose();
+            try
+            {
+                _waveOut.Dispose();
+                _waveOut.Stop();
+            }
+            catch { }
 
-            woE.Stop();
-            wo.Stop();
-            wao.Stop();
         }
 
         internal static bool IsAnyAudioPlaying()
         {
-            return wo.PlaybackState == PlaybackState.Playing || woE.PlaybackState == PlaybackState.Playing || wao.PlaybackState == PlaybackState.Playing;
+            return _waveOut.PlaybackState == PlaybackState.Playing;
+        }
+
+        private static void PlayNextMemorisationStep()
+        {
+            UserControl_QuranReader.PlayNextMemorisationStep(null, null);
         }
     }
 }

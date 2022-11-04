@@ -106,9 +106,11 @@
                             </ComboBox>
 
                             <Line Height="25"/>
-                            <Label Content="Lecture" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
+                            <RadioButton x:Name="radioButton_modeLecture" FontFamily="Candara" FontSize="13" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Checked="RadioButton_ModeLecture_Checked" Unchecked="RadioButton_ModeLecture_Unchecked">
+                                <TextBlock Text="Mode lecture" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="13" FontFamily="Candara" Margin="0,0,2,0" />
+                            </RadioButton>
 
-                            <Border Background="#5FFFE8A8" Margin="0,5,0,0">
+                            <Border x:Name="Border_modeLecture" Background="#FFF7EAE5" Margin="0,5,0,0" CornerRadius="0,10,10,0">
                                 <StackPanel Margin="0,2,0,0">
                                     <RadioButton x:Name="radioButton_recitation_wbwandverse" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,10,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Checked="radioButtons_recitation_Checked" >
                                         <TextBlock Text="Mot à mot + verset" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
@@ -150,6 +152,18 @@
 
                             </Border>
 
+                            <Line Height="15"/>
+                            <RadioButton x:Name="radioButton_modeMemorisation" FontFamily="Candara" FontSize="13" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <TextBlock Text="Mode mémorisation" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="13" FontFamily="Candara" Margin="0,0,2,0" />
+                            </RadioButton>
+
+                            <Border x:Name="Border_modeMemorisation" Background="#FFF7EAE5" Margin="0,5,0,0" CornerRadius="0,10,10,0">
+                                <StackPanel Margin="0,10,0,0">
+                                    <TextBlock Text="Répétition : Durée + 𝑥% du temps :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,0,2,0" />
+                                    <xctk:IntegerUpDown x:Name="integerUpDown_tempsMemoRepeter" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsMemoRepeter_ValueChanged"/>
+
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
                    

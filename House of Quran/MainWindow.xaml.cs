@@ -51,6 +51,7 @@ namespace House_of_Quran
             checkbox_repeter_lecture.IsChecked = Properties.Settings.Default.RepeterLecture;
             checkbox_LectureAutomatique.IsChecked = Properties.Settings.Default.LectureAutomatique;
             integerUpDown_tempsRepeter.Value = (int)Properties.Settings.Default.TempsRepeter;
+            integerUpDown_tempsMemoRepeter.Value = (int)Properties.Settings.Default.TempsRepeterMemo;
 
             switch (Properties.Settings.Default.ChoixRecitation)
             {
@@ -87,6 +88,9 @@ namespace House_of_Quran
 
             checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
             checkbox_uniquementVerset.IsChecked = Properties.Settings.Default.UniquementPourVerset;
+            radioButton_modeLecture.IsChecked = Properties.Settings.Default.ModeLecture;
+            radioButton_modeMemorisation.IsChecked = !Properties.Settings.Default.ModeLecture;
+            Border_modeLecture.IsEnabled = Properties.Settings.Default.ModeLecture;
         }
 
         private void InternetCheck(object? sender, ElapsedEventArgs e)
@@ -628,15 +632,62 @@ namespace House_of_Quran
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.UniquementPourVerset = true;
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.UniquementPourVerset = false;
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
+        private void RadioButton_ModeLecture_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.ModeLecture = true;
+            Border_modeLecture.IsEnabled = true;
+            Border_modeMemorisation.IsEnabled = false;
+            Properties.Settings.Default.Save();
+
+            userControl_QuranReader.ActualPlayingTextBlockPos = -1;
+            userControl_QuranReader.StopLecture();
+        }
+
+        /// <summary>
+        /// Save paramètre
+        /// </summary>
+        private void RadioButton_ModeLecture_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.ModeLecture = false;
+            Border_modeLecture.IsEnabled = false;
+            Border_modeMemorisation.IsEnabled = true;
+            Properties.Settings.Default.Save();
+
+            userControl_QuranReader.StopLecture();
+        }
+
+        private void integerUpDown_tempsMemoRepeter_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            try
+            {
+                Properties.Settings.Default.TempsRepeterMemo = (byte)integerUpDown_tempsMemoRepeter.Value.Value;
+            }
+            catch
+            {
+                Properties.Settings.Default.TempsRepeterMemo = 0;
+            }
+
             Properties.Settings.Default.Save();
         }
     }

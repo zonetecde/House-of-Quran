@@ -188,5 +188,29 @@ namespace House_of_Quran.Properties {
                 this["UniquementPourVerset"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ModeLecture {
+            get {
+                return ((bool)(this["ModeLecture"]));
+            }
+            set {
+                this["ModeLecture"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public int TempsRepeterMemo {
+            get {
+                return ((int)(this["TempsRepeterMemo"]));
+            }
+            set {
+                this["TempsRepeterMemo"] = value;
+            }
+        }
     }
 }
