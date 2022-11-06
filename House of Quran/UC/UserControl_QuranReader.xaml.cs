@@ -408,11 +408,11 @@ namespace House_of_Quran
             {
                 TextBlock textBlock_mot = (TextBlock)WrapPanel_QuranText.Children[i];
 
-                if (!((TextBlock)WrapPanel_QuranText.Children[i]).Text.Contains("﴾"))
+                if (!textBlock_mot.Text.Contains("﴾"))
                 {
                     try
                     {
-                        ((Run)textBlock_mot.Inlines.ElementAt(0)).Text = textBlock_mot.Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
+                        ((Run)textBlock_mot.Inlines.ElementAt(0)).Text = ((Run)textBlock_mot.Inlines.ElementAt(0)).Text.Trim() + new String(' ', Convert.ToInt16(textBlock_espacement.Text));
                         ((Image)((InlineUIContainer)textBlock_mot.Inlines.ElementAt(1)).Child).Margin = new Thickness(Convert.ToInt16(textBlock_espacement.Text), 0, Convert.ToInt16(textBlock_espacement.Text), 0);
                     }
                     catch { }
@@ -421,7 +421,7 @@ namespace House_of_Quran
                 else
                 {
                     if(!Properties.Settings.Default.Tajweed)
-                        textBlock_mot.Text = textBlock_mot.Text.Trim() + new String(' ', 2);
+                        ((Run)textBlock_mot.Inlines.ElementAt(0)).Text = ((Run)textBlock_mot.Inlines.ElementAt(0)).Text.Trim() + new String(' ', 2);
                 }
             }
 
