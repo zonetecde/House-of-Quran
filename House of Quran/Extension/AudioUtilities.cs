@@ -133,120 +133,63 @@ namespace House_of_Quran
 
         internal static void PlayMp3FromLocalFile(string file, List<TextBlock>? verseWords = null, List<string>? files = null)
         {
-            int currentFileIndex = 0;
-
-            Mp3FileReader Mp3Reader = new Mp3FileReader(file);
-            var waveOut = new WaveOut();
-            waveOut.Init(Mp3Reader);
-            waveOut.Play();
-            _waveOut = waveOut;
-            LastColoredTextBlock = verseWords!;
-
-            if (verseWords != null)
-                verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
-
-            t_keepColor = new System.Timers.Timer(10);
-
-            if (verseWords != null)
+            try
             {
-                // anim : keep color
-                t_keepColor.Elapsed += (sender, e) =>
-                {
-                    Application.Current.Dispatcher.BeginInvoke(
-                      DispatcherPriority.Background,
-                      new Action(() => {
-                          if(t_keepColor.Enabled)
-                              verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background =Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
-                      }));
-                };
-                t_keepColor.Start();
-            }
-            LastAudioPlayedDuration = Mp3Reader.TotalTime.TotalMilliseconds;
+                int currentFileIndex = 0;
 
-            waveOut.PlaybackStopped += async (sender, e) =>
-            {
-                if (files != null)
+                Mp3FileReader Mp3Reader = new Mp3FileReader(file);
+                var waveOut = new WaveOut();
+                waveOut.Init(Mp3Reader);
+                waveOut.Play();
+                _waveOut = waveOut;
+                LastColoredTextBlock = verseWords!;
+
+                if (verseWords != null)
+                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
+
+                t_keepColor = new System.Timers.Timer(10);
+
+                if (verseWords != null)
                 {
-                    // joue le deuxieme audio
-                    while (currentFileIndex <= files.Count - 2) // - 2 sinon on peut faire do while ( car currentFileIndex++ à l'intérieur)
+                    // anim : keep color
+                    t_keepColor.Elapsed += (sender, e) =>
                     {
-                        currentFileIndex++;
-
-                        Mp3Reader = new Mp3FileReader(files[currentFileIndex]);
-                        waveOut = new WaveOut();
-                        waveOut.Init(Mp3Reader);
-                        waveOut.Play();
-                        _waveOut = waveOut;
-
-                        LastAudioPlayedDuration += Mp3Reader.TotalTime.TotalMilliseconds;
-
-                        await Task.Delay((int)Mp3Reader.TotalTime.TotalMilliseconds + 100);
-
-                        waveOut.PlaybackStopped += (sender, e) =>
-                        {
-                            waveOut.Dispose();
-                        };
-                        
-                    }
-
-                    if (verseWords != null)
-                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
-                    verseWords = new List<TextBlock>();
-
-                    PlayNextMemorisationStep();
+                        Application.Current.Dispatcher.BeginInvoke(
+                          DispatcherPriority.Background,
+                          new Action(() =>
+                          {
+                              if (t_keepColor.Enabled)
+                                  verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
+                          }));
+                    };
+                    t_keepColor.Start();
                 }
-                else
+                LastAudioPlayedDuration = Mp3Reader.TotalTime.TotalMilliseconds;
+
+                waveOut.PlaybackStopped += async (sender, e) =>
                 {
-                    t_keepColor.Stop();
-
-                    if (verseWords != null)
-                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
-                    verseWords = new List<TextBlock>();
-
-                    waveOut.Dispose();
-
-                    if (Properties.Settings.Default.ModeLecture)
-                        PlayNextAudioIfNeeded();
-                    else if (UserControl_QuranReader.TogglePlayPauseAudio)
-                        PlayNextMemorisationStep();
-                }
-            };
-        }
-
-        internal static async Task PlayAudioFromUrl(string url, List<TextBlock> verseWords, List<string>? urls = null)
-        {
-            int currentFileIndex = 0;
-
-            var mf = new MediaFoundationReader(url);
-            var wo = new WasapiOut();
-            {
-                _waveOut = wo;
-                LastAudioPlayedDuration = mf.TotalTime.TotalMilliseconds;
-
-                wo.PlaybackStopped += async (sender, e) =>
-                {
-                    if (urls != null)
+                    if (files != null)
                     {
                         // joue le deuxieme audio
-                        while (currentFileIndex <= urls.Count - 2) // - 2 sinon on peut faire do while ( car currentFileIndex++ à l'interieur)
+                        while (currentFileIndex <= files.Count - 2) // - 2 sinon on peut faire do while ( car currentFileIndex++ à l'intérieur)
                         {
                             currentFileIndex++;
 
-                            mf = new MediaFoundationReader(urls[currentFileIndex]);
-                            wo = new WasapiOut();
+                            Mp3Reader = new Mp3FileReader(files[currentFileIndex]);
+                            waveOut = new WaveOut();
+                            waveOut.Init(Mp3Reader);
+                            waveOut.Play();
+                            _waveOut = waveOut;
+
+                            LastAudioPlayedDuration += Mp3Reader.TotalTime.TotalMilliseconds;
+
+                            await Task.Delay((int)Mp3Reader.TotalTime.TotalMilliseconds + 100);
+
+                            waveOut.PlaybackStopped += (sender, e) =>
                             {
-                                wo.Init(mf);
-                                wo.Play();
+                                waveOut.Dispose();
+                            };
 
-                                LastAudioPlayedDuration += mf.TotalTime.TotalMilliseconds;
-
-                                await Task.Delay((int)mf.TotalTime.TotalMilliseconds);
-
-                                wo.PlaybackStopped += (sender, e) =>
-                                {
-                                    wo.Dispose();
-                                };
-                            }
                         }
 
                         if (verseWords != null)
@@ -257,35 +200,101 @@ namespace House_of_Quran
                     }
                     else
                     {
-
-                        wo.Dispose();
-                        mf.Dispose();
+                        t_keepColor.Stop();
 
                         if (verseWords != null)
                             verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
                         verseWords = new List<TextBlock>();
 
+                        waveOut.Dispose();
+
                         if (Properties.Settings.Default.ModeLecture)
                             PlayNextAudioIfNeeded();
-                        else if(UserControl_QuranReader.TogglePlayPauseAudio)
+                        else if (UserControl_QuranReader.TogglePlayPauseAudio)
                             PlayNextMemorisationStep();
                     }
                 };
+            }
+            catch { }
+        }
 
-                wo.Init(mf);
-                wo.Play();
-                LastColoredTextBlock = verseWords;
+        internal static async Task PlayAudioFromUrl(string url, List<TextBlock> verseWords, List<string>? urls = null)
+        {
+            try
+            {
+                int currentFileIndex = 0;
 
-                if (verseWords != null)
-                    verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background =Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
-
-                while (wo.PlaybackState == PlaybackState.Playing)
+                var mf = new MediaFoundationReader(url);
+                var wo = new WasapiOut();
                 {
+                    _waveOut = wo;
+                    LastAudioPlayedDuration = mf.TotalTime.TotalMilliseconds;
+
+                    wo.PlaybackStopped += async (sender, e) =>
+                    {
+                        if (urls != null)
+                        {
+                            // joue le deuxieme audio
+                            while (currentFileIndex <= urls.Count - 2) // - 2 sinon on peut faire do while ( car currentFileIndex++ à l'interieur)
+                            {
+                                currentFileIndex++;
+
+                                mf = new MediaFoundationReader(urls[currentFileIndex]);
+                                wo = new WasapiOut();
+                                {
+                                    wo.Init(mf);
+                                    wo.Play();
+
+                                    LastAudioPlayedDuration += mf.TotalTime.TotalMilliseconds;
+
+                                    await Task.Delay((int)mf.TotalTime.TotalMilliseconds);
+
+                                    wo.PlaybackStopped += (sender, e) =>
+                                    {
+                                        wo.Dispose();
+                                    };
+                                }
+                            }
+
+                            if (verseWords != null)
+                                verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
+                            verseWords = new List<TextBlock>();
+
+                            PlayNextMemorisationStep();
+                        }
+                        else
+                        {
+
+                            wo.Dispose();
+                            mf.Dispose();
+
+                            if (verseWords != null)
+                                verseWords.ForEach(x => { x.Foreground = COLOR_AYAH; x.Background = Brushes.Transparent; });
+                            verseWords = new List<TextBlock>();
+
+                            if (Properties.Settings.Default.ModeLecture)
+                                PlayNextAudioIfNeeded();
+                            else if (UserControl_QuranReader.TogglePlayPauseAudio)
+                                PlayNextMemorisationStep();
+                        }
+                    };
+
+                    wo.Init(mf);
+                    wo.Play();
+                    LastColoredTextBlock = verseWords;
+
                     if (verseWords != null)
-                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background =Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
-                    await Task.Delay(100);
+                        verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
+
+                    while (wo.PlaybackState == PlaybackState.Playing)
+                    {
+                        if (verseWords != null)
+                            verseWords.ForEach(x => { x.Foreground = COLOR_AYAH_BEING_PLAYED; x.Background = Properties.Settings.Default.Tajweed ? System.Windows.Media.Brushes.Moccasin : System.Windows.Media.Brushes.Transparent; });
+                        await Task.Delay(100);
+                    }
                 }
             }
+            catch { }
         }
 
         private static void PlayNextAudioIfNeeded()

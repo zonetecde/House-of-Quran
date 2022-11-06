@@ -61,6 +61,7 @@ Source: "C:\Users\zonedetec\OneDrive - Conseil régional Grand Est - Numérique Ed
 Source: "C:\Users\zonedetec\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\House of Quran\House of Quran\bin\Release\net6.0-windows\Xceed.Wpf.Toolkit.NET5.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\zonedetec\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\House of Quran\House of Quran\bin\Release\net6.0-windows\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\zonedetec\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\House of Quran\House of Quran\bin\Release\net6.0-windows\fr\*"; DestDir: "{app}\fr"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\zonedetec\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\House of Quran\House of Quran\bin\Release\net6.0-windows\fonts\*"; DestDir: "{app}\fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

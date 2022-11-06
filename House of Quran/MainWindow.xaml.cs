@@ -93,6 +93,8 @@ namespace House_of_Quran
             //Properties.Settings.Default.DownloadList.Clear();
             //Properties.Settings.Default.CurrentDownloadIndex = 0;
             //Properties.Settings.Default.Save();
+            //foreach (var s in Quran)
+            //    s.DownloadedRecitateur.Clear();
 
             checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
             checkbox_uniquementVerset.IsChecked = Properties.Settings.Default.UniquementPourVerset;
@@ -344,12 +346,14 @@ namespace House_of_Quran
 
                 }
 
+                ColorEffectOnDownloadedSourate();
+
                 progressBar_downloader.Maximum = Properties.Settings.Default.DownloadList.Count;
                 Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Add(comboBox_Recitateur.SelectedIndex); // Préviens que c'est téléchargé 
                 SaveQuran();
 
-                if(!WcDownloader.IsBusy)
-                    DownloadAll(comboBox_Recitateur.SelectedIndex, (int)userControl_QuranReader.Tag);
+                if(!WcDownloader.IsBusy && e != null)
+                    DownloadAll(comboBox_Recitateur.SelectedIndex, (int)userControl_QuranReader.Tag + 1);
 
                 if(!HaveInternet && e != null)
                 {
@@ -400,12 +404,12 @@ namespace House_of_Quran
                 }
                 else if (url.Contains("data")) // verset
                 {
-                    folderPath = @"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + recitateur + "-" + url.Substring(url.LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
+                    folderPath = @"data\quran\" + Quran![sourateIndex - 1].EnglishName + @"\verse\" + recitateur + "-" + url.Substring(url.LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
 
                 }
                 else
                 {
-                    folderPath = @"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\tajweed\" +
+                    folderPath = @"data\quran\" + Quran![sourateIndex - 1].EnglishName + @"\tajweed\" +
                         url.Substring(url.LastIndexOf("r/"), url.Length
                       - url.LastIndexOf("r/")).Replace("r/", string.Empty).Replace("/", "_");
                 }
