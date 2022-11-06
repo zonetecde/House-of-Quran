@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using NAudio.Gui;
+using NAudio.SoundFont;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,9 +32,9 @@ namespace House_of_Quran
     {
         internal static List<Surah>? Quran = new List<Surah>();
         private WebClient WcDownloader = new WebClient();
-        internal List<Recitateur> Recitateurs;
-        internal static FontFamily CurrentFont;
-        internal static MainWindow _MainWindow;
+        internal List<Recitateur> Recitateurs = new List<Recitateur>();
+        internal static FontFamily? CurrentFont;
+        internal static MainWindow? _MainWindow;
         private Timer T_InternetCheck = new Timer(1000);
         internal static bool HaveInternet = true;
 
@@ -85,12 +87,20 @@ namespace House_of_Quran
 
             T_InternetCheck.Elapsed += new ElapsedEventHandler(InternetCheck);
             T_InternetCheck.Start();
+            InternetCheck(this, null!);
+
+            //debug
+            //Properties.Settings.Default.DownloadList.Clear();
+            //Properties.Settings.Default.CurrentDownloadIndex = 0;
+            //Properties.Settings.Default.Save();
 
             checkBox_tajweed.IsChecked = Properties.Settings.Default.Tajweed;
             checkbox_uniquementVerset.IsChecked = Properties.Settings.Default.UniquementPourVerset;
             radioButton_modeLecture.IsChecked = Properties.Settings.Default.ModeLecture;
             radioButton_modeMemorisation.IsChecked = !Properties.Settings.Default.ModeLecture;
             Border_modeLecture.IsEnabled = Properties.Settings.Default.ModeLecture;
+            integerUpDown_tempsMemoRepeterSeconde.Value = Properties.Settings.Default.TempsRepeterMemoSeconde;
+            integerUpDown_tempsRepeterSeconde.Value = Properties.Settings.Default.TempsRepeterSeconde;
         }
 
         private void InternetCheck(object? sender, ElapsedEventArgs e)
@@ -107,7 +117,8 @@ namespace House_of_Quran
                         ColorEffectOnDownloadedRecitator((int)userControl_QuranReader.Tag);
                         ColorEffectOnDownloadedSourate();
                         ContinueDownloading();
-                        checkBox_HorsLigne.IsEnabled = true;
+                        //checkBox_tajweed.IsEnabled = true;
+                        //checkBox_HorsLigne.IsEnabled = true;
                     });
 
                 }
@@ -125,7 +136,8 @@ namespace House_of_Quran
                         // on change tout ce qu'il y a d'accessible qu'avec la wifi
                         ColorEffectOnDownloadedRecitator((int)userControl_QuranReader.Tag);
                         ColorEffectOnDownloadedSourate();
-                        checkBox_HorsLigne.IsEnabled = false;
+                        //checkBox_HorsLigne.IsEnabled = false;
+                        //checkBox_tajweed.IsEnabled = false;
                     });
                 }
                 else
@@ -136,7 +148,7 @@ namespace House_of_Quran
 
         private void InitFont()
         {
-            this.FontFamily = (FontFamily)FindResource((comboBox_font.Items[Properties.Settings.Default.DernierePolice] as ComboBoxItem).Content as string);
+            this.FontFamily = (FontFamily)FindResource(((ComboBoxItem)comboBox_font.Items[Properties.Settings.Default.DernierePolice]).Content as string);
             CurrentFont = this.FontFamily;
             comboBox_font.SelectedIndex = Properties.Settings.Default.DernierePolice;
         }
@@ -149,7 +161,7 @@ namespace House_of_Quran
         private void InitSurahComboBox()
         {
             // Ajoute les sourates à la comboBox pour pouvoir en choisir une
-            foreach (var sourate in Quran)
+            foreach (var sourate in Quran!)
                 comboBox_Sourate.Items.Add(new ComboBoxItem() { Content = sourate.Number + ". " + sourate.EnglishName });
             // Par défaut : sourate de la dernière fermeture du logiciel
             comboBox_Sourate.SelectedIndex = Properties.Settings.Default.DerniereSourate;
@@ -160,7 +172,7 @@ namespace House_of_Quran
         private void InitRécitateur()
         {
             // Ajoute les récitateurs à la comboBox
-            Recitateurs = JsonConvert.DeserializeObject<List<Recitateur>>(File.ReadAllText(@"data\recitateur.json"));
+            Recitateurs = JsonConvert.DeserializeObject<List<Recitateur>>(File.ReadAllText(@"data\recitateur.json"))!;
             foreach (var recitateur in Recitateurs)
             {
                 comboBox_Recitateur.Items.Add(new ComboBoxItem() { Content = recitateur.Nom });
@@ -189,16 +201,36 @@ namespace House_of_Quran
                 // Ajoute un à la progressBar et passe au téléchargement suivant
                 progressBar_downloader.Value += 1;
                 Properties.Settings.Default.CurrentDownloadIndex++;
-                string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex];
+                string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]!;
 
-                if(!WcDownloader.IsBusy)
-                    DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)));
+                if (!WcDownloader.IsBusy)
+                    if (lien.Contains("data") || lien.Contains("wbw"))
+                    {
+                        DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)));
+                    }
+                    else
+                    {
+                        //.Substring(lien.Substring(46, 3).LastIndexOf('/'), lien.Substring(46, 3).Length - lien.Substring(46, 3).LastIndexOf('/'))
+                        string a = lien.Substring(46, 3);
+                        do
+                        {
+                            if (int.TryParse(a, out int b))
+                            {
+                                DownloadAll(0, b);
+                                break;
+                            }
+
+                            a = a.Remove(a.Length - 1, 1);
+                        }
+                        while (true);
+                    }
+
             }
         }
 
         private void InitQuran()
         {
-            Quran = JsonConvert.DeserializeObject<List<Surah>>(File.ReadAllText(@"data\quran.json"));
+            Quran = JsonConvert.DeserializeObject<List<Surah>>(File.ReadAllText(@"data\Quran.json"));
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -216,12 +248,15 @@ namespace House_of_Quran
             if(HaveInternet)
                 if (Properties.Settings.Default.DownloadList.Count > 0)
                 {
-                    string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex];
+                    string lien = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]!;
                     string lien2 = lien.Substring(0, lien.LastIndexOf('/') + 1);
                     progressBar_downloader.Maximum = Properties.Settings.Default.DownloadList.Count;
                     progressBar_downloader.Value = Properties.Settings.Default.CurrentDownloadIndex;
-                    
-                    DownloadAll(Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1)), lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)));
+
+                    int recitateur = Recitateurs.FindIndex(x => x.Lien == lien.Substring(0, lien.LastIndexOf('/') + 1));
+                    int sourate = lien.Contains("wbw") ? Convert.ToInt16(lien.Substring(31, 3)) : lien.Contains("data") ? Convert.ToInt16(lien.Substring(lien.LastIndexOf('/') + 1, 3)) : Convert.ToInt16((lien.Substring(lien.LastIndexOf("r/"), lien.Length
+                      - lien.LastIndexOf("r/")).Replace("r/", string.Empty).Replace("/", "_")).Split('_')[0]);
+                    DownloadAll(recitateur, sourate);
                 }
         }
 
@@ -234,24 +269,25 @@ namespace House_of_Quran
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void checkBox_HorsLigne_Checked(object sender, RoutedEventArgs e)
+        internal void checkBox_HorsLigne_Checked(object sender, RoutedEventArgs e)
         {
             // Tag du userControl = index de la sourate actuellement affiché 
             int surahId = (int)userControl_QuranReader.Tag;
 
-            if (!Quran[surahId].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
+            if (!Quran![surahId].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
             {
                 // Créé le dossier qui contient les audios
-                Directory.CreateDirectory(@"data\quran\" + Quran[surahId].EnglishName);
-                Directory.CreateDirectory(@"data\quran\" + Quran[surahId].EnglishName + @"\wbw"); // dossier contenant les audios de chaque mot
-                Directory.CreateDirectory(@"data\quran\" + Quran[surahId].EnglishName + @"\verse"); // dossier contenant les audios de chaque verset
+                Directory.CreateDirectory(@"data\quran\" + Quran![surahId].EnglishName);
+                Directory.CreateDirectory(@"data\quran\" + Quran![surahId].EnglishName + @"\wbw"); // dossier contenant les audios de chaque mot
+                Directory.CreateDirectory(@"data\quran\" + Quran![surahId].EnglishName + @"\verse"); // dossier contenant les audios de chaque verset
+                Directory.CreateDirectory(@"data\quran\" + Quran![surahId].EnglishName + @"\tajweed"); // dossier contenant les images tajweed
 
                 // Ajoute les liens a télécharger dans la liste DownloadLinks
-                foreach (var verse in Quran[surahId].Ayahs)
+                foreach (var verse in Quran![surahId].Ayahs)
                 {
                     string lienVerset = GetVerseDownloadLink(surahId, verse.NumberInSurah, comboBox_Recitateur.SelectedIndex);
 
-                    if (!File.Exists(@"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + comboBox_Recitateur.SelectedIndex + lienVerset.Substring(40, 3) + ".ogg")
+                    if (!File.Exists(@"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + comboBox_Recitateur.SelectedIndex + lienVerset.Substring(40, 3) + ".ogg")
                         && !Properties.Settings.Default.DownloadList.Contains(lienVerset))
                         Properties.Settings.Default.DownloadList.Add(lienVerset);
 
@@ -261,18 +297,64 @@ namespace House_of_Quran
                         string lienWbw = GetWordDownloadLink(surahId, verse.NumberInSurah, i);
 
                         // S'il n'a pas déjà été téléchargé et qu'il n'est pas déjà dans la queue
-                        if (!File.Exists(@"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\wbw\" + lienWbw.Substring(35, 7) + ".mp3")
+                        if (!File.Exists(@"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\wbw\" + lienWbw.Substring(35, 7) + ".mp3")
                             && !Properties.Settings.Default.DownloadList.Contains(lienWbw))
                             Properties.Settings.Default.DownloadList.Add(lienWbw);
                     }
+
+                    // tajweed
+                    int toSub = 0;
+                    int addToAudio = 0;
+                    for (int i = 0; i < verse.Text.Split(' ').Length + addToAudio; i++)
+                    {
+                        try
+                        {
+                            string mot = MainWindow.Quran![surahId].Ayahs[verse.NumberInSurah - 1].Text.Split(' ')[i];
+
+
+                            if (mot.Contains("ۘ") || mot.Contains("ۖ") || mot.Contains("ۗ") || mot.Contains("ۙ") || mot.Contains("ۚ") || mot.Contains("ۛ") || mot.Contains("ۜ"))
+                            {
+                                // C'est un signe de prononciation, l'audio du verset +1
+                                addToAudio++;
+                            }
+
+
+                        if (MainWindow.Quran![surahId].Ayahs[verse.NumberInSurah - 1].Text.Split(' ').Length - 1 > i + 1)
+                            if (mot == "يَا" && MainWindow.Quran![surahId].Ayahs[verse.NumberInSurah - 1].Text.Split(' ')[i + 1] == "أَيُّهَا")
+                            {
+                                toSub++;
+                                i++;
+                            }
+
+                            string url_tajweed = "https://static.qurancdn.com/images/w/rq-color/" + (surahId + 1) + "/" + verse.NumberInSurah + "/" + ((i + 1) - toSub + addToAudio) + ".png";
+
+                            if (!File.Exists(@"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\tajweed\" + (surahId + 1) + "_" + verse.NumberInSurah + "_" + ((i + 1) - toSub)))
+                            {
+                                Properties.Settings.Default.DownloadList.Add(url_tajweed);
+                            }
+                        }
+                        catch { /*mot dans + addToAudio, je met ça là pour l'ajout des mots après un petit djim  */
+
+                            string lienWbw = GetWordDownloadLink(surahId, verse.NumberInSurah, i + 1);
+                            Properties.Settings.Default.DownloadList.Add(lienWbw);
+                        }
+
+
+                    }
+
                 }
 
                 progressBar_downloader.Maximum = Properties.Settings.Default.DownloadList.Count;
-                Quran[(int)userControl_QuranReader.Tag].DownloadedRecitateur.Add(comboBox_Recitateur.SelectedIndex); // Préviens que c'est téléchargé 
+                Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Add(comboBox_Recitateur.SelectedIndex); // Préviens que c'est téléchargé 
                 SaveQuran();
 
                 if(!WcDownloader.IsBusy)
                     DownloadAll(comboBox_Recitateur.SelectedIndex, (int)userControl_QuranReader.Tag);
+
+                if(!HaveInternet && e != null)
+                {
+                    MessageBox.Show("Le téléchargement commencera lorsque vous serez connecté à internet", "Information");
+                }
             }
         }
 
@@ -304,19 +386,33 @@ namespace House_of_Quran
         /// <summary>
         /// Télécharge tous les liens présent dans DownloadLinks
         /// </summary>
-        private void DownloadAll(int recitateur, int sourateIndex)
+        private void DownloadAll(int recitateur = -1, int sourateIndex = -1)
         {
             if (HaveInternet)
             {
-                string folderPath = string.Empty;
+                string folderPath;
 
-                if (Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Contains("wbw"))
-                    folderPath = @"data\quran\" + Quran[sourateIndex - 1].EnglishName + @"\wbw\" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(35, 7) + ".mp3";
+                string url = Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]!;
+
+                if (url.Contains("wbw")) // mot
+                {
+                    folderPath = @"data\quran\" + Quran![sourateIndex - 1].EnglishName + @"\wbw\" + url.Substring(35, 7) + ".mp3";
+                }
+                else if (url.Contains("data")) // verset
+                {
+                    folderPath = @"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + recitateur + "-" + url.Substring(url.LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
+
+                }
                 else
-                    folderPath = @"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse\" + recitateur + "-" + Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].Substring(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex].LastIndexOf("/") + 4, 3) + Recitateurs[recitateur].Extension;
+                {
+                    folderPath = @"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\tajweed\" +
+                        url.Substring(url.LastIndexOf("r/"), url.Length
+                      - url.LastIndexOf("r/")).Replace("r/", string.Empty).Replace("/", "_");
+                }
+
 
                 if (!WcDownloader.IsBusy)
-                    WcDownloader.DownloadFileAsync(new Uri(Properties.Settings.Default.DownloadList[Properties.Settings.Default.CurrentDownloadIndex]),
+                    WcDownloader.DownloadFileAsync(new Uri(url!),
 
                         // Set le path de téléchargement du fichier
                         folderPath
@@ -331,20 +427,22 @@ namespace House_of_Quran
         /// <param name="e"></param>
         private void checkBox_HorsLigne_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Êtes-vous sûre de vouloir supprimer la récitation de " + Recitateurs[comboBox_Recitateur.SelectedIndex].Nom + " de sourate " + Quran[(int)userControl_QuranReader.Tag].EnglishName + " des téléchargements ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Êtes-vous sûre de vouloir supprimer la récitation de " + Recitateurs[comboBox_Recitateur.SelectedIndex].Nom + " de sourate " + Quran![(int)userControl_QuranReader.Tag].EnglishName + " des téléchargements ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 // Il n'y a qu'un récitateur de télécharger pour cette sourate, on peut donc tout supprimer
                 try
                 {
-                    if (Quran[(int)userControl_QuranReader.Tag].DownloadedRecitateur.Count == 1)
-                        Directory.Delete(@"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName, true);
+                    if (Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Count == 1)
+                        Directory.Delete(@"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName, true);
                     else
                     {
                         // Un récitateur a supprimé uniquement car d'autres sont téléchargés
-                        string rootFolderPath = @"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse";
+                        string rootFolderPath = @"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\verse";
                         string filesToDelete = comboBox_Recitateur.SelectedIndex + "-"; // Va supprimer les fichiers contenant le récitateur là uniquement
                         string[] fileList = Directory.GetFiles(rootFolderPath).ToList().FindAll(x => x.Contains(filesToDelete)).ToArray();
                         fileList = fileList.Reverse().ToArray();
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
                         foreach (string file in fileList)
                             File.Delete(file);
                     }
@@ -357,7 +455,7 @@ namespace House_of_Quran
                     return;
                 }
 
-                Quran[(int)userControl_QuranReader.Tag].DownloadedRecitateur.Remove(comboBox_Recitateur.SelectedIndex);
+                Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Remove(comboBox_Recitateur.SelectedIndex);
                 SaveQuran();
 
                 // Affiche les récitateurs téléchargé de cette sourate en vert
@@ -372,7 +470,7 @@ namespace House_of_Quran
 
         private static void SaveQuran()
         {
-            File.WriteAllText(@"data\quran.json", JsonConvert.SerializeObject(Quran, Formatting.Indented));
+            File.WriteAllText(@"data\Quran.json", JsonConvert.SerializeObject(Quran, Formatting.Indented));
         }
 
         private void comboBox_Sourate_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -380,13 +478,12 @@ namespace House_of_Quran
             checkBox_HorsLigne.Checked -= checkBox_HorsLigne_Checked;
             checkBox_HorsLigne.Unchecked -= checkBox_HorsLigne_Unchecked;
 
-            Surah sourateChoisi = Quran.FirstOrDefault(x => x.Number - 1 == comboBox_Sourate.SelectedIndex);
+            Surah sourateChoisi = Quran!.FirstOrDefault(x => x.Number - 1 == comboBox_Sourate.SelectedIndex)!;
             if (sourateChoisi != default)
             {
-
                 userControl_QuranReader.AfficherSourate(sourateChoisi.Number - 1);
 
-                if (Quran[sourateChoisi.Number - 1].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
+                if (Quran![sourateChoisi.Number - 1].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
                     checkBox_HorsLigne.IsChecked = true;
                 else
                     checkBox_HorsLigne.IsChecked = false;
@@ -408,7 +505,7 @@ namespace House_of_Quran
                 UpDownControl_endVerse.Value = sourateChoisi.Ayahs.Count;
 
                 // Set les dernières bornes mise sur cette sourate 
-                string t = Properties.Settings.Default.FromWhereToWhereForEachSurah.Cast<string>().ToList().FirstOrDefault(x => x.Split(',')[0] == userControl_QuranReader.Tag.ToString());
+                string t = Properties.Settings.Default.FromWhereToWhereForEachSurah.Cast<string>().ToList().FirstOrDefault(x => x.Split(',')[0] == userControl_QuranReader.Tag.ToString())!;
                 if (t != default)
                 {
                     userControl_QuranReader.BorneChanged(Convert.ToInt16(t.Split(',')[1].Split('-')[0]), Convert.ToInt16(t.Split(',')[1].Split('-')[1]));
@@ -431,7 +528,7 @@ namespace House_of_Quran
             for (int i = 0; i < comboBox_Recitateur.Items.Count; i++)
             {
                 ComboBoxItem item = (ComboBoxItem)comboBox_Recitateur.Items[i];
-                if (Quran[sourateChoisi].DownloadedRecitateur.Any(x => x == i))
+                if (Quran![sourateChoisi].DownloadedRecitateur.Any(x => x == i))
                 {
                     // Effet couleur car téléchargé
                     item.Foreground = Brushes.DarkGreen;
@@ -457,23 +554,16 @@ namespace House_of_Quran
             for (int i = 0; i < comboBox_Sourate.Items.Count; i++)
             {
                 ComboBoxItem item = (ComboBoxItem)comboBox_Sourate.Items[i];
-                if (Quran[i].DownloadedRecitateur.Any())
+                if (Quran![i].DownloadedRecitateur.Any())
                 {
                     // Effet couleur car téléchargé
                     item.Foreground = Brushes.DarkGreen;
                     item.Background = Brushes.Bisque;
-
-                    item.IsEnabled = true;
                 }
                 else
                 {
                     item.Background = Brushes.Transparent;
                     item.Foreground = Brushes.Black;
-
-                    if (!HaveInternet)
-                        item.IsEnabled = false;
-                    else
-                        item.IsEnabled = true;
                 }
             }
         }
@@ -483,15 +573,15 @@ namespace House_of_Quran
             checkBox_HorsLigne.Checked -= checkBox_HorsLigne_Checked;
             checkBox_HorsLigne.Unchecked -= checkBox_HorsLigne_Unchecked;
 
-            if (Quran[(int)userControl_QuranReader.Tag].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
+            if (Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Contains(comboBox_Recitateur.SelectedIndex))
             {
                 // vérifie que le récitateur est bien téléchargé 
-                if(Directory.GetFiles(@"data\quran\" + Quran[(int)userControl_QuranReader.Tag].EnglishName + @"\verse").Any(x => x.Contains(comboBox_Recitateur.SelectedIndex + "-")))
+                if(Directory.GetFiles(@"data\quran\" + Quran![(int)userControl_QuranReader.Tag].EnglishName + @"\verse").Any(x => x.Contains(comboBox_Recitateur.SelectedIndex + "-")))
                     checkBox_HorsLigne.IsChecked = true;
                 else
                 {
                     checkBox_HorsLigne.IsChecked = false;
-                    Quran[(int)userControl_QuranReader.Tag].DownloadedRecitateur.Remove(comboBox_Recitateur.SelectedIndex);
+                    Quran![(int)userControl_QuranReader.Tag].DownloadedRecitateur.Remove(comboBox_Recitateur.SelectedIndex);
                     SaveQuran();
                 }
             }
@@ -509,7 +599,7 @@ namespace House_of_Quran
 
         private void comboBox_font_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            this.FontFamily = (FontFamily)FindResource((e.AddedItems[0] as ComboBoxItem).Content as string);
+            this.FontFamily = (FontFamily)FindResource(((ComboBoxItem)e.AddedItems[0]!).Content as string);
             userControl_QuranReader.CheckFontOfNumber(this.FontFamily);
 
             CurrentFont = this.FontFamily;
@@ -530,7 +620,7 @@ namespace House_of_Quran
                 UpDownControl_endVerse.Value++;
 
             userControl_QuranReader.BorneChanged(UpDownControl_startVerse.Value, UpDownControl_endVerse.Value);
-            string t = Properties.Settings.Default.FromWhereToWhereForEachSurah.Cast<string>().ToList().FirstOrDefault(x => x.Split(',')[0] == userControl_QuranReader.Tag.ToString());
+            string t = Properties.Settings.Default.FromWhereToWhereForEachSurah.Cast<string>().ToList().FirstOrDefault(x => x.Split(',')[0] == userControl_QuranReader.Tag.ToString())!;
             if(t == default)
             {
                 Properties.Settings.Default.FromWhereToWhereForEachSurah.Add(userControl_QuranReader.Tag.ToString() + "," + UpDownControl_startVerse.Value + "-" + UpDownControl_endVerse.Value);
@@ -552,7 +642,7 @@ namespace House_of_Quran
         /// <param name="e"></param>
         private void checkBox_tajweed_Checked(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.Tajweed = checkBox_tajweed.IsChecked.Value;
+            Properties.Settings.Default.Tajweed = checkBox_tajweed.IsChecked!.Value;
             Properties.Settings.Default.Save();
 
             userControl_QuranReader.ApplyTajweed(checkBox_tajweed.IsChecked.Value);
@@ -613,7 +703,7 @@ namespace House_of_Quran
         {
             try
             {
-                Properties.Settings.Default.TempsRepeter = (byte)integerUpDown_tempsRepeter.Value.Value;
+                Properties.Settings.Default.TempsRepeter = (byte)integerUpDown_tempsRepeter.Value!.Value;
             }
             catch
             {
@@ -681,7 +771,7 @@ namespace House_of_Quran
         {
             try
             {
-                Properties.Settings.Default.TempsRepeterMemo = (byte)integerUpDown_tempsMemoRepeter.Value.Value;
+                Properties.Settings.Default.TempsRepeterMemo = (byte)integerUpDown_tempsMemoRepeter.Value!.Value;
             }
             catch
             {
@@ -689,6 +779,57 @@ namespace House_of_Quran
             }
 
             Properties.Settings.Default.Save();
+        }
+
+        private void integerUpDown_tempsMemoRepeterSeconde_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            try
+            {
+                Properties.Settings.Default.TempsRepeterMemoSeconde = (byte)integerUpDown_tempsMemoRepeterSeconde.Value!.Value;
+            }
+            catch
+            {
+                Properties.Settings.Default.TempsRepeterMemoSeconde = 0;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+        
+        private void integerUpDown_tempsRepeterSeconde_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            try
+            {
+                Properties.Settings.Default.TempsRepeterSeconde = (byte)integerUpDown_tempsRepeterSeconde.Value!.Value;
+            }
+            catch
+            {
+                Properties.Settings.Default.TempsRepeterSeconde = 0;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
+        internal void AfficherTempsApprentissage(TimeSpan temps_total, bool enCalcul = false)
+        {
+            // apprentissage 
+            if(!enCalcul)
+                txtBlock_modeMemo.Text = "(" + (int)temps_total.Minutes + "min" + (int)temps_total.Seconds + ")";
+            else
+                txtBlock_modeMemo.Text = "(calcul...)";
+
+            if (temps_total.TotalMilliseconds == 0)
+                txtBlock_modeMemo.Text = "(aucune connexion internet)";
+        }
+
+        private void Button_TelechargementMasse_Click(object sender, RoutedEventArgs e)
+        {
+            uc_telechargementMasse.Load();
+            Grid_telechargementMasse.Visibility = Visibility.Visible;
+        }
+
+        private void Grid_telechargementMasse_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Grid_telechargementMasse.Visibility = Visibility.Hidden;
         }
     }
 }

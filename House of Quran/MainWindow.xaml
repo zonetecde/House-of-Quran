@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:House_of_Quran"
         mc:Ignorable="d"
         d:Width="850" d:Height="1500"
-        Title="House of Quran" FontFamily="{StaticResource QuranTaha}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing">
+        Title="House of Quran" FontFamily="{StaticResource QuranTaha}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing" Icon="/hoq_icon_png.png">
     <Grid>
         <ProgressBar x:Name="progressBar_downloader" Background="#FF202124" SmallChange="1" Foreground="#FF5A3088" BorderThickness="0,0,0,0"/>
 
@@ -15,21 +15,26 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.15*"/>
                 <ColumnDefinition Width="0.01*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="0.01*"/>
+                <ColumnDefinition Width="1*" MinWidth="500"/>
+                <ColumnDefinition Width="0.005*"/>
+                <ColumnDefinition Width="0.005*"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="0.015*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
 
             <local:UserControl_QuranReader x:Name="userControl_QuranReader" Grid.Column="2" Grid.Row="1"  />
 
+            <GridSplitter Grid.Row="1" Background="#00A9A9A9"  ResizeDirection="Columns" Grid.Column="3" 
+                       VerticalAlignment="Stretch" 
+                      ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" Margin="0,0,0,0" Width="10" Foreground="#00000000" MinWidth="5" />
+
             <GridSplitter Grid.Row="1" Background="#00A9A9A9"  ResizeDirection="Columns" Grid.Column="1" 
                        VerticalAlignment="Stretch" 
                       ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" Margin="0,0,0,0" Width="5" Foreground="#00000000" MinWidth="5" />
-            
+
             <Grid Grid.Column="0" Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.1*"/>
@@ -89,23 +94,12 @@
                                 <xctk:IntegerUpDown  Grid.Row="1" Grid.Column="2" Name="UpDownControl_endVerse" FontFamily="Consolas" Minimum="1" BorderBrush="#00ABADB3" HorizontalContentAlignment="Center" ValueChanged="UpDownControl_verses_ValueChanged" />
                             </Grid>
 
-                            <Line Height="25"/>
+                            <Line Height="20"/>
 
                             <Label Content="Récitateur" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
                             <ComboBox x:Name="comboBox_Recitateur" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" />
 
-                            <Line Height="25"/>
-                            <Label Content="Police" FontFamily="Candara" FontSize="13" Margin="0,0,0,-5"/>
-                            <ComboBox x:Name="comboBox_font" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" SelectedIndex="0">
-                                <ComboBoxItem Content="Me_Quran"/>
-                                <ComboBoxItem Content="Al_Qalam_Quran_Majeed"/>
-                                <ComboBoxItem Content="noorehidayat-Regular"/>
-                                <ComboBoxItem Content="Othmani"/>
-                                <ComboBoxItem Content="ScheherazadeRegOT"/>
-                                <ComboBoxItem Content="QuranTaha"/>
-                            </ComboBox>
-
-                            <Line Height="25"/>
+                            <Line Height="20"/>
                             <RadioButton x:Name="radioButton_modeLecture" FontFamily="Candara" FontSize="13" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Checked="RadioButton_ModeLecture_Checked" Unchecked="RadioButton_ModeLecture_Unchecked">
                                 <TextBlock Text="Mode lecture" TextWrapping="WrapWithOverflow" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="13" FontFamily="Candara" Margin="0,0,2,0" />
                             </RadioButton>
@@ -140,10 +134,15 @@
                                         </CheckBox><Run Text="(Uniquement pour les versets?)" FontSize="12"/>
                                         
                                     </TextBlock>
-                                   
 
-                                        <TextBlock Text="Durée + 𝑥% du temps :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,0,2,0" />
-                                    <xctk:IntegerUpDown IsEnabled="False" x:Name="integerUpDown_tempsRepeter" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsRepeter_ValueChanged"/>
+                                    <TextBlock TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,5,2,0" >
+                                        <Run  Text="Répétition :" FontWeight="Bold"/>
+                                        <LineBreak/>
+                                        <Run  Text="Durée + 𝑥% du temps :"/>
+                                    </TextBlock>
+                                    <xctk:IntegerUpDown x:Name="integerUpDown_tempsRepeter" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsRepeter_ValueChanged"/>
+                                    <TextBlock Text="+ 𝑥 seconde(s) :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,-7.5,2,0" />
+                                    <xctk:IntegerUpDown x:Name="integerUpDown_tempsRepeterSeconde" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsRepeterSeconde_ValueChanged"/>
 
                                     <CheckBox x:Name="checkbox_LectureAutomatique" Grid.Row="3" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="5,0,0,10" Grid.RowSpan="2" RenderTransformOrigin="0.5,0.5" Unchecked="checkbox_LectureAutomatique_Unchecked"  >
                                         <TextBlock Text="Lecture automatique" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="0,0,2,0" />
@@ -154,21 +153,62 @@
 
                             <Line Height="15"/>
                             <RadioButton x:Name="radioButton_modeMemorisation" FontFamily="Candara" FontSize="13" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                <TextBlock Text="Mode mémorisation" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="13" FontFamily="Candara" Margin="0,0,2,0" />
+                                <TextBlock TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="13" FontFamily="Candara" Margin="0,0,2,0">
+                                    <Run Text="Mode mémorisation"/>
+                                    <Run   x:Name="txtBlock_modeMemo" FontFamily="Consolas" />
+                                </TextBlock>
                             </RadioButton>
 
                             <Border x:Name="Border_modeMemorisation" Background="#FFF7EAE5" Margin="0,5,0,0" CornerRadius="0,10,10,0">
                                 <StackPanel Margin="0,10,0,0">
-                                    <TextBlock Text="Répétition : Durée + 𝑥% du temps :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,0,2,0" />
+                                    <TextBlock TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,0,2,0" >
+                                        <Run  Text="Répétition :" FontWeight="Bold"/>
+                                        <LineBreak/>
+                                        <Run  Text="Durée + 𝑥% du temps :"/>
+                                    </TextBlock>
                                     <xctk:IntegerUpDown x:Name="integerUpDown_tempsMemoRepeter" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsMemoRepeter_ValueChanged"/>
+                                    <TextBlock Text="+ 𝑥 seconde(s) :" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="10,-7.5,2,0" />
+                                    <xctk:IntegerUpDown x:Name="integerUpDown_tempsMemoRepeterSeconde" Margin="2.5,0,2.5,10" BorderBrush="#00ABADB3" Minimum="0" Maximum="200" FontFamily="Consolas" Height="30" FontSize="20" ValueChanged="integerUpDown_tempsMemoRepeterSeconde_ValueChanged"/>
 
+                                    
                                 </StackPanel>
                             </Border>
+
+                            <Label Content="Police" FontFamily="Candara" FontSize="13" Margin="0,15,0,-5"/>
+                            <ComboBox x:Name="comboBox_font" Margin="2.5,0,2.5,0" FontFamily="Candara" FontSize="16" SelectedIndex="0">
+                                <ComboBoxItem Content="Me_Quran"/>
+                                <ComboBoxItem Content="Al_Qalam_Quran_Majeed"/>
+                                <ComboBoxItem Content="noorehidayat-Regular"/>
+                                <ComboBoxItem Content="Othmani"/>
+                                <ComboBoxItem Content="ScheherazadeRegOT"/>
+                                <ComboBoxItem Content="QuranTaha"/>
+                            </ComboBox>
+                            
+                            <Button Margin="5,14.9,0,0" Background="White" BorderBrush="Black" Click="Button_TelechargementMasse_Click">
+                                <TextBlock Text="Téléchargement en masse" TextWrapping="Wrap"  LineStackingStrategy="BlockLineHeight" LineHeight="15" FontSize="16" FontFamily="Candara" Margin="5,5,5,5" />
+                            </Button>
                         </StackPanel>
                     </ScrollViewer>
                    
                 </Border>
             </Grid>
+
+
+        </Grid>
+
+        <Grid x:Name="Grid_telechargementMasse" Visibility="Hidden" Background="#B2000000" MouseDown="Grid_telechargementMasse_MouseDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="0.5*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.5*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="0.5*"/>
+            </Grid.RowDefinitions>
+
+            <local:UserControl_TelechargementMasse x:Name="uc_telechargementMasse" Grid.Row="1" Grid.Column="1"/>
         </Grid>
     </Grid>
 </Window>

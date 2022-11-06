@@ -212,5 +212,29 @@ namespace House_of_Quran.Properties {
                 this["TempsRepeterMemo"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int TempsRepeterMemoSeconde {
+            get {
+                return ((int)(this["TempsRepeterMemoSeconde"]));
+            }
+            set {
+                this["TempsRepeterMemoSeconde"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int TempsRepeterSeconde {
+            get {
+                return ((int)(this["TempsRepeterSeconde"]));
+            }
+            set {
+                this["TempsRepeterSeconde"] = value;
+            }
+        }
     }
 }

@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="House_of_Quran.UserControl_TelechargementMasse"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:local="clr-namespace:House_of_Quran"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <Border  Background="#FFFFFCFC" CornerRadius="25,25,25,25">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.05*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="0.05*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.05*"/>
+                <RowDefinition Height="0.1*"/>
+                <RowDefinition Height="0.05*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="0.05*"/>
+                <RowDefinition Height="0.1*"/>
+                <RowDefinition Height="0.05*"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="5" Background="White" BorderBrush="Black" Click="Button_Click" >
+                <Viewbox Margin="10,5,10,5" >
+                    <TextBlock Text="Télécharger en arrière plan" FontFamily="Arial" />
+                </Viewbox>
+            </Button>
+            
+            <Viewbox  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+                <TextBlock Text="Téléchargement de masse" FontFamily="Arial" />
+            </Viewbox>
+
+            <Grid Grid.Row="3" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.1*"/>
+                    <RowDefinition Height="0.1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="0.1*"/>
+                </Grid.RowDefinitions>
+                
+                <Viewbox Margin="10,0,10,0" Grid.Row="0">
+                    <TextBlock Text="Sourate à télécharger :" FontFamily="Arial" Margin="0,0,0,5" />
+                </Viewbox>
+
+                <xctk:WatermarkTextBox Grid.Row="1" x:Name="textBox_searchSurah" Watermark="Rechercher" FontSize="16" FontFamily="Arial" Margin="0,0,18,0" TextChanged="txtBox_searchSura_TextChanged" VerticalContentAlignment="Center" BorderThickness="1,1,1,0" BorderBrush="Black"/>
+                <ScrollViewer Grid.Row="2">
+                    <xctk:CheckListBox x:Name="checkListBox_surah" BorderBrush="Black" BorderThickness="1,1,1,0">
+                    </xctk:CheckListBox>
+                </ScrollViewer>
+
+                <Grid Grid.Row="3" Margin="0,0,18,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.9*"/>
+                        <ColumnDefinition Width="0.9*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Tout cocher" Background="White" Click="Button_ToutCocher_Click" BorderBrush="Black" BorderThickness="1,0,0,1"/>
+                    <Button Grid.Column="1" Content="Tout décocher" Background="White" Click="Button_ToutDecocher_Click" BorderBrush="Black" BorderThickness="0,0,1,1"/>
+                </Grid>
+            </Grid>
+            
+            <Grid Grid.Row="3" Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.1*"/>
+                    <RowDefinition Height="0.1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="0.1*"/>
+                </Grid.RowDefinitions>
+                
+                <Viewbox Margin="10,0,10,0" Grid.Row="0">
+                    <TextBlock Text="avec le(s) récitateur(s) :" FontFamily="Arial" Margin="0,0,0,5" />
+                </Viewbox>
+
+                <xctk:WatermarkTextBox Grid.Row="1" x:Name="textBox_searchRecitateur" Watermark="Rechercher" FontSize="16" FontFamily="Arial" Margin="0,0,18,0" TextChanged="textBox_searchRecitateur_TextChanged" VerticalContentAlignment="Center" BorderBrush="Black" BorderThickness="1,1,1,0"/>
+                <ScrollViewer Grid.Row="2">
+                    <xctk:CheckListBox x:Name="checkListBox_recitateur" BorderBrush="Black" BorderThickness="1,1,1,0">
+                    </xctk:CheckListBox>
+                </ScrollViewer>
+
+                <Grid Grid.Row="3" Margin="0,0,18,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.9*"/>
+                        <ColumnDefinition Width="0.9*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Tout cocher" Background="White" Click="Button_ToutCocher2_Click" BorderThickness="1,0,0,1"/>
+                    <Button Grid.Column="1" Content="Tout décocher" Background="White" Click="Button_ToutDecocher2_Click" BorderThickness="0,0,1,1"/>
+                </Grid>
+            </Grid>
+        </Grid> 
+    </Border>
+</UserControl>

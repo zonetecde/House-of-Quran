@@ -6,6 +6,7 @@
     <RootNamespace>House_of_Quran</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>hoq_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,18 @@
     <None Remove="fonts\othmani.ttf" />
     <None Remove="fonts\QuranTaha.ttf" />
     <None Remove="fonts\ScheherazadeRegOT.ttf" />
+    <None Remove="hoq_icon.ico" />
+    <None Remove="hoq_icon_png.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="hoq_icon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +42,8 @@
     <Resource Include="fonts\othmani.ttf" />
     <Resource Include="fonts\QuranTaha.ttf" />
     <Resource Include="fonts\ScheherazadeRegOT.ttf" />
+    <Resource Include="hoq_icon.ico" />
+    <Resource Include="hoq_icon_png.png" />
   </ItemGroup>
 
   <ItemGroup>

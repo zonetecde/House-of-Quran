@@ -74,10 +74,13 @@
             <Grid>
                 <!-- Effet répétition -->
                 <ScrollViewer Margin="15,15,15,15" >
-                    <Grid>
-                        <local:AlignableWrapPanel HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
-                        <Line Height="200"/>
-                    </Grid>
+                    <StackPanel>
+
+                        <Label x:Name="label_bismillah" Content="﻿بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" Margin="0,0,-20,15"/>
+                        
+                        <local:AlignableWrapPanel  HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
+                        <Line  Height="200"/>
+                    </StackPanel>
                     
                 </ScrollViewer>
 
@@ -102,7 +105,7 @@
                                         <ColumnDefinition Width="1*"/>
                                         <ColumnDefinition Width="1*"/>
                                     </Grid.ColumnDefinitions>
-                                    <ProgressBar  x:Name="progressBar_repeterAnim1" Grid.Column="0" Background="Transparent" BorderBrush="#00BCBCBC" Value="0" Foreground="#FFFF8D87" RenderTransformOrigin="0.5,0.5">
+                                    <ProgressBar  x:Name="progressBar_repeterAnim1" Grid.Column="0" Background="Transparent" BorderBrush="#00BCBCBC" Value="0" Foreground="#FFFF8D87" RenderTransformOrigin="0.5,0.5" Margin="0,0,-2,0">
                                         <ProgressBar.RenderTransform>
                                             <TransformGroup>
                                                 <ScaleTransform/>
@@ -112,7 +115,7 @@
                                             </TransformGroup>
                                         </ProgressBar.RenderTransform>
                                     </ProgressBar>
-                                    <ProgressBar  x:Name="progressBar_repeterAnim2" Grid.Column="1"  Background="Transparent" BorderBrush="#00BCBCBC" Value="0" Foreground="#FFFF8D87" RenderTransformOrigin="0.5,0.5">
+                                    <ProgressBar  x:Name="progressBar_repeterAnim2" Grid.Column="1"  Background="Transparent" BorderBrush="#00BCBCBC" Value="0" Foreground="#FFFF8D87" RenderTransformOrigin="0.5,0.5" Margin="-2,0,0,0">
 
                                     </ProgressBar>
                                 </Grid>
