@@ -831,5 +831,27 @@ namespace House_of_Quran
         {
             Grid_telechargementMasse.Visibility = Visibility.Hidden;
         }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F11)
+            {
+                if (this.WindowStyle == WindowStyle.SingleBorderWindow)
+                {
+                    this.Visibility = Visibility.Collapsed;
+                    this.Topmost = true;
+                    this.WindowStyle = WindowStyle.None;
+                    this.ResizeMode = ResizeMode.NoResize;
+                    this.Visibility = Visibility.Visible;
+
+                }
+                else
+                {
+                    this.Topmost = false;
+                    this.WindowStyle = WindowStyle.SingleBorderWindow;
+                    this.ResizeMode = ResizeMode.CanResize;
+                }
+            }
+        }
     }
 }

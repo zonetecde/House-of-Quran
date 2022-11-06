@@ -70,15 +70,15 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <Border Background="White" Grid.Row="1" CornerRadius="20,20,0,0">
+        <Border Background="White" Grid.Row="1" CornerRadius="20,20,0,0" FocusVisualStyle="{x:Null}">
             <Grid>
                 <!-- Effet répétition -->
-                <ScrollViewer Margin="15,15,15,15" >
-                    <StackPanel>
+                <ScrollViewer Margin="15,15,15,15" FocusVisualStyle="{x:Null}" >
+                    <StackPanel FocusVisualStyle="{x:Null}" >
 
                         <Label x:Name="label_bismillah" Content="﻿بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" Margin="0,0,-20,15"/>
-                        
-                        <local:AlignableWrapPanel  HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
+
+                        <local:AlignableWrapPanel FocusVisualStyle="{x:Null}" HorizontalContentAlignment="Center"  x:Name="WrapPanel_QuranText" FlowDirection="RightToLeft"/>
                         <Line  Height="200"/>
                     </StackPanel>
                     

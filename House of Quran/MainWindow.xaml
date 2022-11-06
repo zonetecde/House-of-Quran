@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:House_of_Quran"
         mc:Ignorable="d"
         d:Width="850" d:Height="1500"
-        Title="House of Quran" FontFamily="{StaticResource QuranTaha}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing" Icon="/hoq_icon_png.png">
+        Title="House of Quran" FontFamily="{StaticResource QuranTaha}" MinHeight="650" MinWidth="850" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing" Icon="/hoq_icon_png.png" KeyDown="Window_KeyDown">
     <Grid>
         <ProgressBar x:Name="progressBar_downloader" Background="#FF202124" SmallChange="1" Foreground="#FF5A3088" BorderThickness="0,0,0,0"/>
 
