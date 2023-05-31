@@ -149,7 +149,7 @@ namespace House_of_Quran
             this.Tag = id;
 
             label_bismillah.FontSize = Convert.ToInt16(textBlock_textSize.Text) / 1.5;
-            label_bismillah.Visibility = id == 0 ? Visibility.Collapsed : Visibility.Visible;
+            label_bismillah.Visibility = (id == 0 || id == 8) ? Visibility.Hidden : Visibility.Visible;
 
             // pour éviter que la méthode soit appelé 2 fois :
             string? t = Properties.Settings.Default.FromWhereToWhereForEachSurah.Cast<string>().ToList().FirstOrDefault(x => x.Split(',')[0] == Tag.ToString());
@@ -581,8 +581,6 @@ namespace House_of_Quran
             urls_files_times = new List<string[]>();
             MemorisationSteps.Clear();
 
-            TimeSpan temps_total = new TimeSpan(0); // temps total que la mémorisation va prendre
-
             // Lis 2x le premier mot
             // premier index affiché
             int i = 0;
@@ -606,7 +604,7 @@ namespace House_of_Quran
             // Void du premier mot
             MemorisationSteps.Add(new Step(StepType.VOID, new int[1] { ActualPlayingTextBlockPos }));
 
-            AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4, true);
+            //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4, true);
 
             bool premierVerset = true;
             List<string[]> allUrlAndSurah = new List<string[]>();
@@ -640,7 +638,7 @@ namespace House_of_Quran
                         // Void du premier mot
                         MemorisationSteps.Add(new Step(StepType.VOID, new int[1] { ActualPlayingTextBlockPos }));
 
-                        AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
+                        //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
                     }
                     else
                     {
@@ -663,14 +661,14 @@ namespace House_of_Quran
                             string tag3 = ((TextBlock)WrapPanel_QuranText.Children[actualWord - 1]).Tag.ToString()!;
                             MemorisationSteps.Add(new Step(StepType.LECTURE_MOT, new int[3] { actualWordMoins2, actualWord, ActualPlayingTextBlockPos })) ;
                             MemorisationSteps.Add(new Step(StepType.REPETITION, new int[3] { actualWordMoins2, actualWord, ActualPlayingTextBlockPos }));
-                            AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag2.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag2.Remove(0, 3).Insert(3, "_") + ".mp3",2);
-                            AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3",2);
-                            AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag3.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag3.Remove(0, 3).Insert(3, "_") + ".mp3",2);
+                            //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag2.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag2.Remove(0, 3).Insert(3, "_") + ".mp3",2);
+                            //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3",2);
+                            //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag3.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag3.Remove(0, 3).Insert(3, "_") + ".mp3",2);
 
                         }
 
-                        AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag2.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag2.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
-                        AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 6);
+                        //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag2.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag2.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
+                        //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 6);
                     }
                 }
                 else
@@ -695,13 +693,13 @@ namespace House_of_Quran
                             MemorisationSteps.Add(new Step(StepType.REPETITION, new int[1] { Convert.ToInt16(allUrlAndSurah[v][0]) }));
                             MemorisationSteps.Add(new Step(StepType.LECTURE_VERSET, new int[1] { Convert.ToInt16(allUrlAndSurah[v][0]) }));
                             MemorisationSteps.Add(new Step(StepType.VOID, new int[1] { Convert.ToInt16(allUrlAndSurah[v][0]) }));
-                            AudioUtilities.TempsAudio(allUrlAndSurah[v][1], allUrlAndSurah[v][2], 4);
+                            //AudioUtilities.TempsAudio(allUrlAndSurah[v][1], allUrlAndSurah[v][2], 4);
                         }
                     }
                     else
                         premierVerset = false;
 
-                    AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
+                    //AudioUtilities.TempsAudio("https://audio.qurancdn.com/wbw/" + tag.Insert(3, "_").Insert(7, "_") + ".mp3", @"data\quran\" + MainWindow.Quran![(int)this.Tag].EnglishName + @"\wbw\" + tag.Remove(0, 3).Insert(3, "_") + ".mp3", 4);
                 }
 
                 // est-ce que c'est la fin?
@@ -712,7 +710,7 @@ namespace House_of_Quran
 
             ActualPlayingTextBlockPos = -1;
             // Affiche le temps
-            MainWindow._MainWindow!.AfficherTempsApprentissage(new TimeSpan(), true);
+            //MainWindow._MainWindow!.AfficherTempsApprentissage(new TimeSpan(), true);
         }
 
         internal void StopLecture()
